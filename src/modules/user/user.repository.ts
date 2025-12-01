@@ -21,7 +21,7 @@ export class UserRepository {
   }
 
   async findUserById(userId: string) {
-    return this.userRepository.delete({ where: { id: userId } });
+    return this.userRepository.findUnique({ where: { id: userId } });
   }
 
   async findUserByEmailAndPassword(email: string, password: string) {

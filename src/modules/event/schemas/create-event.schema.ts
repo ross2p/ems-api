@@ -44,4 +44,7 @@ export const createEventSchema = Joi.object({
     .messages({
       'string.guid': 'Category ID must be a valid UUID',
     }),
+
+  createdById: Joi.string().uuid().optional(),
+  
 });

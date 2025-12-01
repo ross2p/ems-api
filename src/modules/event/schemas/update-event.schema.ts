@@ -39,8 +39,6 @@ export const updateEventSchema = Joi.object({
     .messages({
       'string.guid': 'Category ID must be a valid UUID',
     }),
+  createdById: Joi.string().uuid().optional(),
+  
 })
-  .min(1)
-  .messages({
-    'object.min': 'At least one field must be provided for update',
-  });

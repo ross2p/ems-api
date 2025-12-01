@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
   UsePipes,
 } from '@nestjs/common';
@@ -19,6 +20,7 @@ import {
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { CategoryFilterDto } from './dto/category-filter.dto';
 import { ResponseMessage, UserDetails } from 'src/decorators';
 import { AuthGuard } from 'src/guards/user.guard';
 import { UserEntity } from '../user/user.entity';
@@ -32,14 +34,23 @@ import { updateCategorySchema } from './schemas/update-category.schema';
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
+  @Get()
+  @ApiOperation({ summary: 'Get all categories with pagination and search' })
+  @ApiResponse({ status: 200, description: 'List of categories' })
+  @ResponseMessage('Categories retrieved successfully')
+  async getCategories(@Query() categoryFilterDto: CategoryFilterDto) {
+    return this.categoryService.findPageableCategories(categoryFilterDto);
+  }
+
   @Post()
   @UseGuards(AuthGuard)
-  @UsePipes(new ValidationPipe(createCategorySchema))
   @ApiOperation({ summary: 'Create a new category' })
   @ApiResponse({ status: 201, description: 'Category created successfully' })
   @ResponseMessage('Category created successfully')
   async createCategory(
-    @Body() createCategoryDto: CreateCategoryDto,
+    @Body(
+      new ValidationPipe(createCategorySchema)
+    ) createCategoryDto: CreateCategoryDto,
     @UserDetails() user: UserEntity,
   ) {
     createCategoryDto.createdById = user.id;

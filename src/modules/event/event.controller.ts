@@ -45,12 +45,11 @@ export class EventController {
 
   @Post()
   @UseGuards(AuthGuard)
-  @UsePipes(new ValidationPipe(createEventSchema))
   @ApiOperation({ summary: 'Create a new event' })
   @ApiResponse({ status: 201, description: 'Event created successfully' })
   @ResponseMessage('Event created successfully')
   async createEvent(
-    @Body() createEventDto: CreateEventDto,
+    @Body(new ValidationPipe(createEventSchema)) createEventDto: CreateEventDto,
     @UserDetails() user: UserEntity,
   ) {
     createEventDto.createdById = user.id;

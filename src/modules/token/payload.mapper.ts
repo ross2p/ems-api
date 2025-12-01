@@ -5,7 +5,7 @@ import { UserEntity } from '../user/user.entity';
 export class PayloadMapper {
   public userEntityToUserPayload(userEntity: UserEntity): UserPayload {
     return {
-      id: userEntity.id,
+      userId: userEntity.id,
       email: userEntity.email,
     };
   }

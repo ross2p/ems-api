@@ -9,8 +9,6 @@ export const updateCategorySchema = Joi.object({
     'string.min': 'Description must have at least 1 character',
     'string.max': 'Description must not exceed 500 characters',
   }),
+  
+  createdById: Joi.string().uuid().optional(),
 })
-  .min(1)
-  .messages({
-    'object.min': 'At least one field must be provided for update',
-  });
