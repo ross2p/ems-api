@@ -68,6 +68,17 @@ export class EventController {
     return this.eventService.findEventByIdOrThrow(eventId);
   }
 
+  @Get(':id/similar')
+  @ApiOperation({ summary: 'Get similar events based on category' })
+  @ApiParam({ name: 'id', description: 'Event ID' })
+  @ApiResponse({ status: 200, description: 'Similar events retrieved' })
+  @ResponseMessage('Similar events retrieved successfully')
+  async getSimilarEvents(
+    @Param('id', new ValidationPipe(uuidSchema)) eventId: string,
+  ) {
+    return this.eventService.findSimilarEvents(eventId);
+  }
+
   @Patch(':id')
   @UseGuards(AuthGuard)
   @UsePipes(new ValidationPipe(updateEventSchema))

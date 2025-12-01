@@ -5,8 +5,6 @@ import { ErrorResponse } from './responses';
 @Catch(HttpException)
 export class ExceptionFilter extends IExceptionHandler<HttpException> {
   handle(exception: HttpException): ErrorResponse {
-
-    console.log(exception)
     const response = exception.getResponse() as {
       message?: string;
       error?: string;

@@ -19,6 +19,10 @@ export class PageRequest<T = any> {
     return this.pageNumber * this.pageSize - this.pageSize;
   }
 
+  get take(): number {
+    return this.pageSize;
+  }
+
   toPageResponse<U>(content: U[], count: number): PageResponse<U, T> {
     return new PageResponse<U, T>(this, content, count);
   }

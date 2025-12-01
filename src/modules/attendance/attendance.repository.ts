@@ -24,9 +24,9 @@ export class AttendanceRepository {
 
   async findAllAttendance(attendanceFilterDto: AttendanceFilterDto) {
     return this.attendanceRepository.findMany({
-        where: {eventId: attendanceFilterDto.eventId},
-        skip: attendanceFilterDto.skip,
-        take: attendanceFilterDto.pageSize
+      where: { eventId: attendanceFilterDto.eventId },
+      skip: attendanceFilterDto.skip,
+      take: attendanceFilterDto.pageSize,
     });
   }
 
@@ -42,10 +42,7 @@ export class AttendanceRepository {
     });
   }
 
-  async updateAttendance(
-    attendanceId: string,
-    data: UpdateAttendanceDto,
-  ) {
+  async updateAttendance(attendanceId: string, data: UpdateAttendanceDto) {
     return this.attendanceRepository.update({
       where: { id: attendanceId },
       data,

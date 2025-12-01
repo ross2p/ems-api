@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { BadRequest } from 'http-errors';
 import { TokenService } from '../token/token.service';
@@ -29,7 +33,10 @@ export class AuthService {
   }
 
   async login(data: LoginDto): Promise<AuthResponseDto> {
-    const user = await this.userService.findUserByEmailandPassword(data.email, data.password);
+    const user = await this.userService.findUserByEmailandPassword(
+      data.email,
+      data.password,
+    );
 
     if (!user) {
       throw new BadRequestException('Invalid credentials');

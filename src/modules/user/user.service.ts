@@ -4,7 +4,6 @@ import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { checkExists, SALT_ROUND } from 'src/utils';
 import * as bcrypt from 'bcrypt';
- 
 
 @Injectable()
 export class UserService {
@@ -18,7 +17,7 @@ export class UserService {
 
   async createUser(newUser: CreateUserDto) {
     if (newUser.password) {
-      newUser.password = this.hashPassword(newUser.password);
+      newUser.password = await this.hashPassword(newUser.password);
     }
     return this.userRepository.createUser(newUser);
   }
@@ -26,12 +25,12 @@ export class UserService {
   async updateUser(userId: string, updateUserDto: UpdateUserDto) {
     await this.findUserByIdOrThrow(userId);
     if (updateUserDto.password) {
-      updateUserDto.password = this.hashPassword(updateUserDto.password);
+      updateUserDto.password = await this.hashPassword(updateUserDto.password);
     }
     return this.userRepository.updateUser(userId, updateUserDto);
   }
 
-  private hashPassword(password: string) {
+  private async hashPassword(password: string) {
     return bcrypt.hash(password, SALT_ROUND);
   }
 
@@ -41,6 +40,9 @@ export class UserService {
   }
 
   async findUserByEmailandPassword(email: string, password: string) {
-    return this.userRepository.findUserByEmailAndPassword(email, this.hashPassword(password));
+    return this.userRepository.findUserByEmailAndPassword(
+      email,
+      await this.hashPassword(password),
+    );
   }
 }

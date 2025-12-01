@@ -22,6 +22,21 @@ export const createEventSchema = Joi.object({
     'date.min': 'End date must be greater than or equal to start date',
     'any.required': 'End date is required',
   }),
+  location: Joi.string().min(1).max(500).required().messages({
+    'string.min': 'Event location is required',
+    'string.max': 'Event location must not exceed 500 characters',
+    'any.required': 'Event location is required',
+  }),
+  latitude: Joi.number().min(-90).max(90).optional().allow(null).messages({
+    'number.base': 'Latitude must be a valid number',
+    'number.min': 'Latitude must be between -90 and 90',
+    'number.max': 'Latitude must be between -90 and 90',
+  }),
+  longitude: Joi.number().min(-180).max(180).optional().allow(null).messages({
+    'number.base': 'Longitude must be a valid number',
+    'number.min': 'Longitude must be between -180 and 180',
+    'number.max': 'Longitude must be between -180 and 180',
+  }),
   categoryId: Joi.string()
     .uuid({ version: 'uuidv4' })
     .optional()

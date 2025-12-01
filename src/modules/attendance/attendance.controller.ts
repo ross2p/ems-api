@@ -1,5 +1,22 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards, UsePipes } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiBearerAuth, ApiTags, ApiParam } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+  UsePipes,
+} from '@nestjs/common';
+import {
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiTags,
+  ApiParam,
+} from '@nestjs/swagger';
 import { AttendanceService } from './attendance.service';
 import { CreateAttendanceDto } from './dtos/create-attendance.dto';
 import { UpdateAttendanceDto } from './dtos/update-attendance.dto';
@@ -28,7 +45,10 @@ export class AttendanceController {
   @UseGuards(AuthGuard)
   @UsePipes(new ValidationPipe(createAttendanceSchema))
   @ApiOperation({ summary: 'Create a new attendance record' })
-  @ApiResponse({ status: 201, description: 'Attendance record created successfully' })
+  @ApiResponse({
+    status: 201,
+    description: 'Attendance record created successfully',
+  })
   @ResponseMessage('Attendance record created successfully')
   async createAttendance(@Body() createAttendanceDto: CreateAttendanceDto) {
     return this.attendanceService.createAttendance(createAttendanceDto);
@@ -69,20 +89,29 @@ export class AttendanceController {
   @UsePipes(new ValidationPipe(updateAttendanceSchema))
   @ApiOperation({ summary: 'Update attendance record by ID' })
   @ApiParam({ name: 'id', description: 'Attendance ID' })
-  @ApiResponse({ status: 200, description: 'Attendance record updated successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Attendance record updated successfully',
+  })
   @ResponseMessage('Attendance record updated successfully')
   async updateAttendance(
     @Param('id') attendanceId: string,
     @Body() updateAttendanceDto: UpdateAttendanceDto,
   ) {
-    return this.attendanceService.updateAttendance(attendanceId, updateAttendanceDto);
+    return this.attendanceService.updateAttendance(
+      attendanceId,
+      updateAttendanceDto,
+    );
   }
 
   @Delete(':id')
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Delete attendance record by ID' })
   @ApiParam({ name: 'id', description: 'Attendance ID' })
-  @ApiResponse({ status: 200, description: 'Attendance record deleted successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Attendance record deleted successfully',
+  })
   @ResponseMessage('Attendance record deleted successfully')
   async deleteAttendance(@Param('id') attendanceId: string) {
     return this.attendanceService.deleteAttendance(attendanceId);

@@ -1,8 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { CreateEventDto } from './dto/create-event.dto';
-import { EventEntity } from './event.entity';
 import { UpdateEventDto } from './dto/update-event.dto';
-import { PageRequest } from 'src/utils/pageables/page-request.utils';
 import { EventFilterDto } from './dto/event-filter.dto';
 import { EventRepository } from './event.repository';
 import { checkExists } from 'src/utils';
@@ -12,7 +10,9 @@ export class EventService {
   constructor(private readonly eventRepository: EventRepository) {}
 
   async findPageableEvents(pageRequest: EventFilterDto) {
-    return this.eventRepository.findPageableEvents(pageRequest);
+    const [events, totalCount] = await Promise.all([this.eventRepository.findPageableEvents(
+      pageRequest), this.eventRepository.countEvents(pageRequest)]);
+    return  pageRequest.toPageResponse(events, totalCount);
   }
 
   async findEventByIdOrThrow(eventId: string) {
@@ -34,5 +34,15 @@ export class EventService {
   async deleteEvent(eventId: string) {
     await this.findEventByIdOrThrow(eventId);
     return this.eventRepository.deleteEvent(eventId);
+  }
+
+  async findSimilarEvents(eventId: string) {
+    const event = await this.findEventByIdOrThrow(eventId);
+
+    const eventFilterDto = new EventFilterDto();
+    eventFilterDto.categoryId = event.categoryId;
+    eventFilterDto.excludeEventIds = [eventId];
+
+    return this.findPageableEvents(eventFilterDto);
   }
 }

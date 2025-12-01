@@ -30,6 +30,29 @@ export class CreateEventDto {
   endDate: Date;
 
   @ApiProperty({
+    description: 'Event location address',
+    type: String,
+    example: '123 Main Street, New York, NY 10001',
+  })
+  location: string;
+
+  @ApiProperty({
+    description: 'Event location latitude coordinate',
+    type: Number,
+    required: false,
+    example: 40.7128,
+  })
+  latitude?: number;
+
+  @ApiProperty({
+    description: 'Event location longitude coordinate',
+    type: Number,
+    required: false,
+    example: -74.006,
+  })
+  longitude?: number;
+
+  @ApiProperty({
     description: 'ID of the user who created this event',
     type: String,
   })

@@ -5,7 +5,7 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 import { PrismaClient } from '../../generated/prisma/client';
-import { PrismaPostgresAdapter } from '@prisma/adapter-ppg'
+import { PrismaPostgresAdapter } from '@prisma/adapter-ppg';
 import { PrismaPg } from '@prisma/adapter-pg';
 
 @Injectable()
@@ -16,21 +16,18 @@ export class DatabaseService
   private readonly logger: Logger = new Logger(DatabaseService.name);
 
   constructor() {
+    const connectionString = `${process.env.DATABASE_URL}`;
 
-    const connectionString = `${process.env.DATABASE_URL}`
-
-    const adapter = new PrismaPg({ connectionString })
-      super({
-        adapter,
-        omit: {
-          user: {
-            password: true,
-          },
+    const adapter = new PrismaPg({ connectionString });
+    super({
+      adapter,
+      omit: {
+        user: {
+          password: true,
         },
-      });
+      },
+    });
   }
-
-
 
   public async onModuleInit() {
     this.logger.log('Connecting to database...');
