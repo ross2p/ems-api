@@ -47,4 +47,8 @@ export class AttendanceService {
     await this.findAttendanceByIdOrThrow(attendanceId);
     return this.attendanceRepository.deleteAttendance(attendanceId);
   }
+
+  async findUsersWhoAttendedEvents(eventIds: string[]) {
+    return this.attendanceRepository.findUsersWhoAttendedEvents(eventIds);
+  }
 }

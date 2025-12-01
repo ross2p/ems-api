@@ -8,7 +8,8 @@ import { EventFilterBuilder } from './event-filter.builder';
 
 @Injectable()
 export class EventRepository {
-  private readonly eventRepository;
+  private readonly eventRepository: Prisma.EventDelegate;
+  
   constructor(db: DatabaseService) {
     this.eventRepository = db.event;
   }
@@ -69,5 +70,48 @@ export class EventRepository {
   async countEvents(eventFilterDto: EventFilterDto) {
     const { where } = this.getFilter(eventFilterDto);
     return this.eventRepository.count({ where });
+  }
+  
+  async findUserAttendedEvents(userId: string) {
+    return this.eventRepository.findMany({
+      where: {
+        attendances: {
+          some: {
+            userId: userId,
+          },
+        },
+      },
+      include: {
+        category: true,
+      },
+    });
+  }
+
+  async findEventsByIds(eventIds: string[]) {
+    return this.eventRepository.findMany({
+      where: {
+        id: {
+          in: eventIds,
+        },
+      },
+      include: {
+        category: true,
+        createdBy: true
+      },
+    });
+  }
+
+  async findAllEventsExcept(excludeIds: string[]) {
+    return this.eventRepository.findMany({
+      where: {
+        id: {
+          notIn: excludeIds,
+        },
+      },
+      include: {
+        category: true,
+        createdBy: true
+      },
+    });
   }
 }

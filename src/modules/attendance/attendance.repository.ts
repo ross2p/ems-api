@@ -54,4 +54,15 @@ export class AttendanceRepository {
       where: { id: attendanceId },
     });
   }
+
+  async findUsersWhoAttendedEvents(eventIds: string[]) {
+    const attendances = await this.attendanceRepository.findMany({
+      where: {
+        eventId: {
+          in: eventIds,
+        },
+      },
+    });
+    return attendances;
+  }
 }

@@ -28,12 +28,15 @@ import { ValidationPipe } from 'src/pipes/validation.pipe';
 import { createEventSchema } from './schemas/create-event.schema';
 import { updateEventSchema } from './schemas/update-event.schema';
 import { uuidSchema } from 'src/schemas/uuid.schema';
+import { EventRecommendationService } from './event-recommendation.service';
 
 @ApiTags('Events')
 @ApiBearerAuth()
 @Controller('event')
 export class EventController {
-  constructor(private readonly eventService: EventService) {}
+  constructor(private readonly eventService: EventService, 
+    private readonly eventRecommendationService: EventRecommendationService,
+  ) {}
 
   @Get()
   @ApiOperation({ summary: 'Get all events with pagination and filtering' })
@@ -68,14 +71,23 @@ export class EventController {
   }
 
   @Get(':id/similar')
-  @ApiOperation({ summary: 'Get similar events based on category' })
+  @ApiOperation({ 
+    summary: 'Get similar events with personalized recommendations',
+    description: 'Returns personalized event recommendations if user is authenticated. Uses collaborative filtering and content-based filtering.'
+  })
   @ApiParam({ name: 'id', description: 'Event ID' })
   @ApiResponse({ status: 200, description: 'Similar events retrieved' })
   @ResponseMessage('Similar events retrieved successfully')
+  @UseGuards(AuthGuard)
   async getSimilarEvents(
     @Param('id', new ValidationPipe(uuidSchema)) eventId: string,
+    @Query('limit') limit?: string,
+    @UserDetails() user?: UserEntity,
   ) {
-    return this.eventService.findSimilarEvents(eventId);
+    const limitNumber = limit ? parseInt(limit, 10) : 10;
+    const userId = user?.id;
+    
+    return this.eventRecommendationService.getRecommendedEvents(eventId, userId, limitNumber);
   }
 
   @Patch(':id')
