@@ -1,5 +1,5 @@
-const RESPONSE_MESSAGE_KEY = 'responseMessage';
-const IS_PUBLIC_KEY = 'isPublic';
+const RESPONSE_MESSAGE_KEY = Symbol('RESPONSE_MESSAGE_KEY');
+const IS_PUBLIC_KEY = Symbol('IS_PUBLIC_KEY');
 const SALT_ROUND = 10;
 
 export { RESPONSE_MESSAGE_KEY, IS_PUBLIC_KEY, SALT_ROUND };
