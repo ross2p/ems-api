@@ -40,5 +40,4 @@ export const updateEventSchema = Joi.object({
       'string.guid': 'Category ID must be a valid UUID',
     }),
   createdById: Joi.string().uuid().optional(),
-  
-})
+});

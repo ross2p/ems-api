@@ -10,7 +10,10 @@ export class CategoryService {
   constructor(private categoryRepository: CategoryRepository) {}
 
   async findPageableCategories(filters: CategoryFilterDto) {
-    const [categories, totalCount] = await Promise.all([this.categoryRepository.findPageableCategories(filters), this.categoryRepository.countCategories(filters)]);
+    const [categories, totalCount] = await Promise.all([
+      this.categoryRepository.findPageableCategories(filters),
+      this.categoryRepository.countCategories(filters),
+    ]);
     return filters.toPageResponse(categories, totalCount);
   }
 

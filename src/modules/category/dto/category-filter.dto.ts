@@ -9,4 +9,3 @@ export class CategoryFilterDto extends PageRequest {
   })
   search?: string;
 }
-

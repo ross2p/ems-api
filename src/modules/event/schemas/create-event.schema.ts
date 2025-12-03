@@ -46,5 +46,4 @@ export const createEventSchema = Joi.object({
     }),
 
   createdById: Joi.string().uuid().optional(),
-  
 });

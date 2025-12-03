@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { DatabaseService } from '../../database/database.service';
+import { DatabaseService } from '../database/database.service';
 import { CreateAttendanceDto } from './dtos/create-attendance.dto';
 import { UpdateAttendanceDto } from './dtos/update-attendance.dto';
 import { AttendanceFilterDto } from './dtos/attendance-filter.dto';

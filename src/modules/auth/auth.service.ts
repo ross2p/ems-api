@@ -33,12 +33,13 @@ export class AuthService {
   }
 
   async login(data: LoginDto): Promise<AuthResponseDto> {
-    const user = await this.userService.findUserByEmailandPassword(
-      data.email,
-      data.password,
-    );
+    const user = await this.userService.findUserByEmailWithPassword(data.email);
 
-    if (!user) {
+    if (
+      !user ||
+      !user.password ||
+      !(await bcrypt.compare(data.password, user.password))
+    ) {
       throw new BadRequestException('Invalid credentials');
     }
 

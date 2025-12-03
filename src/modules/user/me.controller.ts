@@ -11,7 +11,6 @@ import {
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
-  ApiTags,
 } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { ResponseMessage, UserDetails } from 'src/decorators';

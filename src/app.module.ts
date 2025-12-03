@@ -13,8 +13,9 @@ import { EventModule } from './modules/event/event.module';
 import { CategoryModule } from './modules/category/category.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { TokenModule } from './modules/token/token.module';
-import { DatabaseModule } from './database/database.module';
+import { DatabaseModule } from './modules/database/database.module';
 import { AttendanceModule } from './modules/attendance/attendance.module';
+import { CacheModule } from './modules/cache/cache.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { AttendanceModule } from './modules/attendance/attendance.module';
       validationSchema: envSchema,
     }),
     DatabaseModule,
+    CacheModule,
 
     // <----MODULES---->
     UserModule,

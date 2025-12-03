@@ -20,4 +20,9 @@ export const envSchema = Joi.object({
   ACCESS_TOKEN_EXPIRE: Joi.string().required(),
   REFRESH_TOKEN_EXPIRE: Joi.string().required(),
   JWT_SECRET_KEY: Joi.string().required(),
+
+  // REDIS
+  REDIS_HOST: Joi.string().default('localhost'),
+  REDIS_PORT: Joi.number().default(6379),
+  REDIS_TTL: Joi.number().default(300), // 5 minutes default
 }).unknown(true);

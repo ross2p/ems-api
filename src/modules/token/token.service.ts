@@ -61,7 +61,7 @@ export class TokenService {
   private verifyToken<T extends Payload>(token: string, secretKey: string): T {
     try {
       return this.jwtService.verify<T>(token, { secret: secretKey });
-    } catch (err) {
+    } catch {
       throw new BadRequestException('Invalid token');
     }
   }

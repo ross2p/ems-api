@@ -6,6 +6,43 @@ export class EventFilterBuilder {
     createdAt: 'desc',
   };
 
+  addRadiusFilter(
+    latitude?: number,
+    longitude?: number,
+    radiusKm?: number,
+  ): this {
+    if (
+      latitude !== undefined &&
+      longitude !== undefined &&
+      radiusKm !== undefined
+    ) {
+      const earthRadiusKm = 6371;
+      const latDiff = (radiusKm / earthRadiusKm) * (180 / Math.PI);
+      const lonDiff =
+        (radiusKm / (earthRadiusKm * Math.cos((Math.PI * latitude) / 180))) *
+        (180 / Math.PI);
+
+      this.whereClause.AND = this.whereClause.AND || [];
+      (this.whereClause.AND as Prisma.EventWhereInput[]).push({
+        AND: [
+          {
+            latitude: {
+              gte: latitude - latDiff,
+              lte: latitude + latDiff,
+            },
+          },
+          {
+            longitude: {
+              gte: longitude - lonDiff,
+              lte: longitude + lonDiff,
+            },
+          },
+        ],
+      });
+    }
+    return this;
+  }
+
   addSearch(search?: string): this {
     if (search) {
       this.whereClause.OR = [
@@ -26,8 +63,8 @@ export class EventFilterBuilder {
     return this;
   }
 
-  addCategoryFilter(categoryId?: string): this {
-    if (categoryId) {
+  addCategoryFilter(categoryId?: string | null): this {
+    if (categoryId !== undefined) {
       this.whereClause.categoryId = categoryId;
     }
     return this;

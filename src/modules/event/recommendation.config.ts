@@ -5,20 +5,31 @@ export interface RecommendationConfig {
     time: number;
     collaborative: number;
   };
-  maxDistance: number; // Maximum distance in kilometers for location similarity
-  minSimilarUsers: number; // Minimum number of similar users to consider
-  maxRecommendations: number; // Default number of recommendations to return
+  maxDistance: number;
+  minSimilarUsers: number;
+  maxRecommendations: number;
+  candidateGeneration: {
+    maxCandidates: number;
+    sameCategoryLimit: number;
+    nearbyEventsLimit: number;
+    upcomingDaysRange: number;
+  };
 }
 
 export const RECOMMENDATION_CONFIG: RecommendationConfig = {
   weights: {
-    category: 0.4, // 40% weight for category similarity
-    location: 0.3, // 30% weight for location similarity
-    time: 0.2, // 20% weight for time similarity
-    collaborative: 0.1, // 10% weight for collaborative filtering
+    category: 0.4,
+    location: 0.3,
+    time: 0.2,
+    collaborative: 0.1,
   },
-  maxDistance: 50, // 50 km
-  minSimilarUsers: 3, // At least 3 similar users
-  maxRecommendations: 10, // Return top 10 recommendations by default
+  maxDistance: 50,
+  minSimilarUsers: 3,
+  maxRecommendations: 10,
+  candidateGeneration: {
+    maxCandidates: 100,
+    sameCategoryLimit: 50,
+    nearbyEventsLimit: 30,
+    upcomingDaysRange: 90,
+  },
 };
-

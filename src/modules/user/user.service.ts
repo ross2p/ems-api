@@ -39,10 +39,7 @@ export class UserService {
     return this.userRepository.deleteUser(userId);
   }
 
-  async findUserByEmailandPassword(email: string, password: string) {
-    return this.userRepository.findUserByEmailAndPassword(
-      email,
-      await this.hashPassword(password),
-    );
+  async findUserByEmailWithPassword(email: string) {
+    return checkExists(this.userRepository.findUserByEmailWithPassword(email));
   }
 }

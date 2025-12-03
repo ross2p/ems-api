@@ -29,13 +29,17 @@ import { createEventSchema } from './schemas/create-event.schema';
 import { updateEventSchema } from './schemas/update-event.schema';
 import { uuidSchema } from 'src/schemas/uuid.schema';
 import { EventRecommendationService } from './event-recommendation.service';
+import { PageRequest } from 'src/utils/pageables/page-request.utils';
+import { CacheService } from '../cache/cache.service';
 
 @ApiTags('Events')
 @ApiBearerAuth()
 @Controller('event')
 export class EventController {
-  constructor(private readonly eventService: EventService, 
+  constructor(
+    private readonly eventService: EventService,
     private readonly eventRecommendationService: EventRecommendationService,
+    private readonly cacheService: CacheService,
   ) {}
 
   @Get()
@@ -71,9 +75,10 @@ export class EventController {
   }
 
   @Get(':id/similar')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Get similar events with personalized recommendations',
-    description: 'Returns personalized event recommendations if user is authenticated. Uses collaborative filtering and content-based filtering.'
+    description:
+      'Returns personalized event recommendations if user is authenticated. Uses collaborative filtering and content-based filtering.',
   })
   @ApiParam({ name: 'id', description: 'Event ID' })
   @ApiResponse({ status: 200, description: 'Similar events retrieved' })
@@ -81,13 +86,19 @@ export class EventController {
   @UseGuards(AuthGuard)
   async getSimilarEvents(
     @Param('id', new ValidationPipe(uuidSchema)) eventId: string,
-    @Query('limit') limit?: string,
-    @UserDetails() user?: UserEntity,
+    @UserDetails() user: UserEntity,
+    @Query() pageRequest?: PageRequest,
   ) {
-    const limitNumber = limit ? parseInt(limit, 10) : 10;
-    const userId = user?.id;
-    
-    return this.eventRecommendationService.getRecommendedEvents(eventId, userId, limitNumber);
+    const userId = user.id;
+    const cacheKey = `similar_events:${eventId}:${userId}:${pageRequest?.toString()}`;
+
+    return this.cacheService.getOrSet(cacheKey, () =>
+      this.eventRecommendationService.getRecommendedEvents(
+        eventId,
+        userId,
+        pageRequest?.take,
+      ),
+    );
   }
 
   @Patch(':id')

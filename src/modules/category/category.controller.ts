@@ -48,9 +48,8 @@ export class CategoryController {
   @ApiResponse({ status: 201, description: 'Category created successfully' })
   @ResponseMessage('Category created successfully')
   async createCategory(
-    @Body(
-      new ValidationPipe(createCategorySchema)
-    ) createCategoryDto: CreateCategoryDto,
+    @Body(new ValidationPipe(createCategorySchema))
+    createCategoryDto: CreateCategoryDto,
     @UserDetails() user: UserEntity,
   ) {
     createCategoryDto.createdById = user.id;

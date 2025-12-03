@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { DatabaseService } from 'src/database/database.service';
+import { DatabaseService } from '../database/database.service';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { UserEntity } from './user.entity';
@@ -24,9 +24,10 @@ export class UserRepository {
     return this.userRepository.findUnique({ where: { id: userId } });
   }
 
-  async findUserByEmailAndPassword(email: string, password: string) {
+  async findUserByEmailWithPassword(email: string) {
     return this.userRepository.findUnique({
-      where: { email, password },
+      where: { email },
+      select: selectWithPassword,
     });
   }
 

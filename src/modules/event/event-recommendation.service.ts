@@ -25,18 +25,15 @@ interface SimilarUser {
 
 @Injectable()
 export class EventRecommendationService {
-  private config: RecommendationConfig;
-
-  constructor(private readonly eventRepository: EventRepository, 
+  constructor(
+    private readonly eventRepository: EventRepository,
     private readonly attendanceService: AttendanceService,
-  ) {
-    this.config = RECOMMENDATION_CONFIG;
-  }
+  ) {}
 
   async getRecommendedEvents(
     eventId: string,
     userId?: string,
-    limit: number = this.config.maxRecommendations,
+    limit: number = RECOMMENDATION_CONFIG.maxRecommendations,
   ) {
     const currentEvent = await this.eventRepository.findEventById(eventId);
 
@@ -44,9 +41,7 @@ export class EventRecommendationService {
       throw new NotFoundException('Event not found');
     }
 
-    const candidateEvents = await this.eventRepository.findAllEventsExcept([
-      currentEvent.id,
-    ]);
+    const candidateEvents = await this.generateCandidates(currentEvent, userId);
 
     if (candidateEvents.length === 0) {
       return [];
@@ -65,10 +60,10 @@ export class EventRecommendationService {
       );
       const timeScore = this.calculateTimeSimilarity(currentEvent, candidate);
 
-      let totalScore =
-        categoryScore * this.config.weights.category +
-        locationScore * this.config.weights.location +
-        timeScore * this.config.weights.time;
+      const totalScore =
+        categoryScore * RECOMMENDATION_CONFIG.weights.category +
+        locationScore * RECOMMENDATION_CONFIG.weights.location +
+        timeScore * RECOMMENDATION_CONFIG.weights.time;
 
       const details = {
         categoryScore,
@@ -93,18 +88,132 @@ export class EventRecommendationService {
     }
 
     eventsWithScores.sort((a, b) => b.score - a.score);
-    
-    return eventsWithScores.slice(0, limit).map(item => item.event);
+
+    return eventsWithScores.slice(0, limit).map((item) => item.event);
   }
 
-  private calculateCategorySimilarity(event1: EventEntity, event2: EventEntity): number {
+  private async generateCandidates(
+    currentEvent: EventEntity,
+    userId?: string,
+  ): Promise<EventEntity[]> {
+    const excludeIds = [currentEvent.id];
+    const candidatesMap = new Map<string, EventEntity>();
+    const config = RECOMMENDATION_CONFIG.candidateGeneration;
+
+    const [
+      sameCategoryEvents,
+      upcomingEvents,
+      nearbyEvents,
+      collaborativeEvents,
+    ] = await Promise.all([
+      currentEvent.categoryId
+        ? this.eventRepository.findEventsByCategory(
+            currentEvent.categoryId,
+            excludeIds,
+            config.sameCategoryLimit,
+          )
+        : Promise.resolve([]),
+      this.eventRepository.findUpcomingEvents(
+        new Date(currentEvent.startDate),
+        config.upcomingDaysRange,
+        excludeIds,
+        config.nearbyEventsLimit,
+      ),
+      currentEvent.latitude && currentEvent.longitude
+        ? this.eventRepository.findNearbyEvents(
+            currentEvent.latitude,
+            currentEvent.longitude,
+            RECOMMENDATION_CONFIG.maxDistance,
+            excludeIds,
+            config.nearbyEventsLimit,
+          )
+        : Promise.resolve([]),
+      userId
+        ? this.getCollaborativeCandidates(userId, excludeIds)
+        : Promise.resolve([]),
+    ]);
+
+    [
+      ...sameCategoryEvents,
+      ...upcomingEvents,
+      ...nearbyEvents,
+      ...collaborativeEvents,
+    ].forEach((event) => {
+      if (!candidatesMap.has(event.id)) {
+        candidatesMap.set(event.id, event);
+      }
+    });
+
+    const candidates = Array.from(candidatesMap.values());
+
+    if (candidates.length > config.maxCandidates) {
+      return candidates.slice(0, config.maxCandidates);
+    }
+
+    return candidates;
+  }
+
+  private async getCollaborativeCandidates(
+    userId: string,
+    excludeIds: string[],
+  ): Promise<EventEntity[]> {
+    const userEvents =
+      await this.eventRepository.findUserAttendedEvents(userId);
+
+    if (userEvents.length === 0) {
+      return [];
+    }
+
+    const userEventIds = userEvents.map((e) => e.id);
+    const similarUsers = await this.findSimilarUsers(userId, userEventIds);
+
+    if (similarUsers.length < RECOMMENDATION_CONFIG.minSimilarUsers) {
+      return [];
+    }
+
+    const topSimilarUsers = similarUsers.slice(0, 5);
+
+    const eventIdsSet = new Set<string>();
+
+    const allSimilarUserEvents = await Promise.all(
+      topSimilarUsers.map((su) =>
+        this.eventRepository.findUserAttendedEvents(su.userId),
+      ),
+    );
+
+    allSimilarUserEvents.flat().forEach((event) => {
+      if (!excludeIds.includes(event.id) && !userEventIds.includes(event.id)) {
+        eventIdsSet.add(event.id);
+      }
+    });
+
+    const collaborativeEventIds = Array.from(eventIdsSet);
+
+    if (collaborativeEventIds.length === 0) {
+      return [];
+    }
+
+    return this.eventRepository.findEventsByMultipleIds(
+      collaborativeEventIds,
+      excludeIds,
+      30,
+    );
+  }
+
+  private calculateCategorySimilarity(
+    event1: EventEntity,
+    event2: EventEntity,
+  ): number {
     if (!event1.categoryId || !event2.categoryId) {
       return 0;
     }
     return event1.categoryId === event2.categoryId ? 1 : 0;
   }
 
-  private calculateLocationSimilarity(event1: EventEntity, event2: EventEntity): number {
+  private calculateLocationSimilarity(
+    event1: EventEntity,
+    event2: EventEntity,
+  ): number {
     if (
       !event1.latitude ||
       !event1.longitude ||
@@ -121,7 +230,7 @@ export class EventRecommendationService {
       event2.longitude,
     );
 
-    const score = Math.max(0, 1 - distance / this.config.maxDistance);
+    const score = Math.max(0, 1 - distance / RECOMMENDATION_CONFIG.maxDistance);
     return score;
   }
 
@@ -150,7 +259,10 @@ export class EventRecommendationService {
     return degrees * (Math.PI / 180);
   }
 
-  private calculateTimeSimilarity(event1: EventEntity, event2: EventEntity): number {
+  private calculateTimeSimilarity(
+    event1: EventEntity,
+    event2: EventEntity,
+  ): number {
     const date1 = new Date(event1.startDate);
     const date2 = new Date(event2.startDate);
 
@@ -176,28 +288,32 @@ export class EventRecommendationService {
     userId: string,
     currentEventId: string,
   ): Promise<void> {
-    const userEvents = await this.eventRepository.findUserAttendedEvents(
-      userId,
-    );
-    
+    const userEvents =
+      await this.eventRepository.findUserAttendedEvents(userId);
+
     if (userEvents.length === 0) {
       return;
     }
 
-    const userEventIds = userEvents.map(e => e.id);
-
+    const userEventIds = userEvents.map((e) => e.id);
     const similarUsers = await this.findSimilarUsers(userId, userEventIds);
 
-    if (similarUsers.length < this.config.minSimilarUsers) {
+    if (similarUsers.length < RECOMMENDATION_CONFIG.minSimilarUsers) {
       return;
     }
 
     const similarUsersEventMap = new Map<string, number>();
 
-    for (const similarUser of similarUsers) {
-      const theirEvents = await this.eventRepository.findUserAttendedEvents(
-        similarUser.userId,
-      );
+    const topSimilarUsers = similarUsers.slice(0, 10);
+
+    const allSimilarUserEvents = await Promise.all(
+      topSimilarUsers.map((su) =>
+        this.eventRepository.findUserAttendedEvents(su.userId),
+      ),
+    );
+
+    topSimilarUsers.forEach((similarUser, index) => {
+      const theirEvents = allSimilarUserEvents[index];
 
       for (const event of theirEvents) {
         if (event.id === currentEventId || userEventIds.includes(event.id)) {
@@ -210,7 +326,7 @@ export class EventRecommendationService {
           currentWeight + similarUser.similarity,
         );
       }
-    }
+    });
 
     const maxCollaborativeScore = Math.max(
       ...Array.from(similarUsersEventMap.values()),
@@ -227,7 +343,7 @@ export class EventRecommendationService {
       }
 
       eventWithScore.score +=
-        collaborativeScore * this.config.weights.collaborative;
+        collaborativeScore * RECOMMENDATION_CONFIG.weights.collaborative;
     }
   }
 
@@ -256,7 +372,7 @@ export class EventRecommendationService {
 
     for (const [otherUserId, otherUserEvents] of userEventMap.entries()) {
       const intersection = new Set(
-        [...userEventSet].filter(x => otherUserEvents.has(x)),
+        [...userEventSet].filter((x) => otherUserEvents.has(x)),
       );
       const union = new Set([...userEventSet, ...otherUserEvents]);
 
@@ -275,4 +391,3 @@ export class EventRecommendationService {
     return similarUsers;
   }
 }
-

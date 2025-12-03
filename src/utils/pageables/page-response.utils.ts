@@ -1,13 +1,13 @@
 import { PageRequest } from './page-request.utils';
 
-export class PageResponse<T, R = T> {
+export class PageResponse<T> {
   private readonly totalCount: number;
   private readonly pageNumber: number;
   private readonly pageSize: number;
   private readonly pageCount?: number;
   private readonly content: T[];
 
-  constructor(pageRequest: PageRequest<R>, content: T[], totalCount: number) {
+  constructor(pageRequest: PageRequest, content: T[], totalCount: number) {
     this.pageNumber = pageRequest.pageNumber;
     this.pageSize =
       content.length < pageRequest.pageSize
@@ -28,7 +28,7 @@ export class PageResponse<T, R = T> {
       {
         pageNumber: this.pageNumber,
         pageSize: this.pageSize,
-      } as PageRequest<U>,
+      } as PageRequest,
       this.content.map(callbackFn, thisArg),
       this.totalCount,
     );

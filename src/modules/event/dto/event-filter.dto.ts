@@ -14,7 +14,7 @@ export class EventFilterDto extends PageRequest {
     required: false,
     example: 'a1b2c3d4-e5f6-7890-g1h2-i3j4k5l6m7n8',
   })
-  categoryId?: string;
+  categoryId?: string | null;
 
   @ApiProperty({
     description: 'Filter events starting from this date',
@@ -47,6 +47,10 @@ export class EventFilterDto extends PageRequest {
     example: 'asc',
   })
   sortOrder?: 'asc' | 'desc';
+
+  radiusKm?: number;
+  latitude?: number;
+  longitude?: number;
 
   excludeEventIds: string[];
 }
