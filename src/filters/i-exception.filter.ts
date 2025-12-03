@@ -24,7 +24,6 @@ export abstract class IExceptionHandler<
         return result;
       }
       case 'ws': {
-        const wsContext = host.switchToWs();
         break;
       }
       default:

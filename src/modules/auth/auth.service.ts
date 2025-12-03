@@ -4,7 +4,6 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { BadRequest } from 'http-errors';
 import { TokenService } from '../token/token.service';
 import { UserService } from '../user/user.service';
 import { TokenType } from '../token/token-type.enum';

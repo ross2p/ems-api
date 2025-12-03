@@ -3,11 +3,11 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { CategoryFilterDto } from './dto/category-filter.dto';
 import { Injectable } from '@nestjs/common';
-import { Prisma } from 'generated/prisma';
+import { Prisma } from '../../../generated/prisma';
 
 @Injectable()
 export class CategoryRepository {
-  private readonly categoryRepository;
+  private readonly categoryRepository: Prisma.CategoryDelegate;
 
   constructor(db: DatabaseService) {
     this.categoryRepository = db.category;

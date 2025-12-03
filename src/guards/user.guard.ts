@@ -4,7 +4,6 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { firstValueFrom } from 'rxjs';
 import { Request } from 'express';
 import { AuthService } from '../modules/auth/auth.service';
 import { UserEntity } from '../modules/user/user.entity';

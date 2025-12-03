@@ -90,7 +90,7 @@ export class EventController {
     @Query() pageRequest?: PageRequest,
   ) {
     const userId = user.id;
-    const cacheKey = `similar_events:${eventId}:${userId}:${pageRequest?.toString()}`;
+    const cacheKey = `similar_events:${eventId}:${userId}:${JSON.stringify(pageRequest)}`;
 
     return this.cacheService.getOrSet(cacheKey, () =>
       this.eventRecommendationService.getRecommendedEvents(

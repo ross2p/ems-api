@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { AttendanceRepository } from './attendance.repository';
 import { checkExists } from '../../utils';
 import { CreateAttendanceDto } from './dtos/create-attendance.dto';

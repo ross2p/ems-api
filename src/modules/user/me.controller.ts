@@ -7,11 +7,7 @@ import {
   UseGuards,
   UsePipes,
 } from '@nestjs/common';
-import {
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { ResponseMessage, UserDetails } from 'src/decorators';
 import { UserEntity } from './user.entity';

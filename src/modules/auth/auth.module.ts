@@ -3,7 +3,6 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { TokenModule } from '../token/token.module';
 import { UserModule } from '../user/user.module';
-import { AuthGuard } from 'src/guards/user.guard';
 
 @Global()
 @Module({

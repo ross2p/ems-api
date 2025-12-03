@@ -3,10 +3,11 @@ import { DatabaseService } from '../database/database.service';
 import { CreateAttendanceDto } from './dtos/create-attendance.dto';
 import { UpdateAttendanceDto } from './dtos/update-attendance.dto';
 import { AttendanceFilterDto } from './dtos/attendance-filter.dto';
+import { Prisma } from '../../../generated/prisma';
 
 @Injectable()
 export class AttendanceRepository {
-  private readonly attendanceRepository;
+  private readonly attendanceRepository: Prisma.AttendanceDelegate;
 
   constructor(db: DatabaseService) {
     this.attendanceRepository = db.attendance;

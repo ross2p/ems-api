@@ -1,9 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { EventRepository } from './event.repository';
-import {
-  RECOMMENDATION_CONFIG,
-  RecommendationConfig,
-} from './recommendation.config';
+import { RECOMMENDATION_CONFIG } from './recommendation.config';
 import { AttendanceService } from '../attendance/attendance.service';
 import { EventEntity } from './event.entity';
 

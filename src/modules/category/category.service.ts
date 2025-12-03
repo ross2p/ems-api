@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CategoryRepository } from './category.repository';
 import { checkExists } from 'src/utils';
 import { CreateCategoryDto } from './dto/create-category.dto';
