@@ -40,6 +40,6 @@ export class UserService {
   }
 
   async findUserByEmailWithPassword(email: string) {
-    return checkExists(this.userRepository.findUserByEmailWithPassword(email));
+    return checkExists(this.userRepository.findUserByEmailWithPassword(email), "User Not found");
   }
 }

@@ -19,5 +19,5 @@ COPY --from=builder /app/node_modules /app/node_modules
 COPY --from=builder /app/dist /app/dist
 COPY --from=builder /app/generated /app/generated
 
-
+EXPOSE 3000
 CMD ["npm", "run", "start:prod"]

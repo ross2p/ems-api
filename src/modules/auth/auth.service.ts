@@ -32,7 +32,7 @@ export class AuthService {
   }
 
   async login(data: LoginDto): Promise<AuthResponseDto> {
-    const user = await this.userService.findUserByEmailWithPassword(data.email);
+    const user = await this.userService.findUserByEmailWithPassword(data.email).catch(()=>null);
 
     if (
       !user ||
