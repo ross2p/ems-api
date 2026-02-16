@@ -21,15 +21,15 @@ import { EventService } from './event.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { EventFilterDto } from './dto/event-filter.dto';
-import { ResponseMessage, UserDetails } from 'src/decorators';
-import { AuthGuard } from 'src/guards/user.guard';
+import { ResponseMessage, UserDetails } from '../../decorators';
+import { AuthGuard } from '../../guards/user.guard';
 import { UserEntity } from '../user/user.entity';
-import { ValidationPipe } from 'src/pipes/validation.pipe';
+import { ValidationPipe } from '../../pipes/validation.pipe';
 import { createEventSchema } from './schemas/create-event.schema';
 import { updateEventSchema } from './schemas/update-event.schema';
-import { uuidSchema } from 'src/schemas/uuid.schema';
+import { uuidSchema } from '../../schemas/uuid.schema';
 import { EventRecommendationService } from './event-recommendation.service';
-import { PageRequest } from 'src/utils/pageables/page-request.utils';
+import { PageRequest } from '../../utils/pageables/page-request.utils';
 import { CacheService } from '../cache/cache.service';
 
 @ApiTags('Events')

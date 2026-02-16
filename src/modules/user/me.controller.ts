@@ -9,11 +9,11 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { UserService } from './user.service';
-import { ResponseMessage, UserDetails } from 'src/decorators';
+import { ResponseMessage, UserDetails } from '../../decorators';
 import { UserEntity } from './user.entity';
 import { UpdateUserDto } from './dtos/update-user.dto';
-import { AuthGuard } from 'src/guards/user.guard';
-import { ValidationPipe } from 'src/pipes/validation.pipe';
+import { AuthGuard } from '../../guards/user.guard';
+import { ValidationPipe } from '../../pipes/validation.pipe';
 import { updateUserSchema } from './schemas/update-user.schema';
 
 @ApiBearerAuth()

@@ -1,6 +1,4 @@
 import { MiddlewareConsumer, Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { UserModule } from './modules/user/user.module';
 import { ResponseInterceptor } from './interceptors';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
@@ -34,11 +32,7 @@ import { CacheModule } from './modules/cache/cache.module';
     TokenModule,
     AttendanceModule,
   ],
-  controllers: [AppController],
   providers: [
-    // <----SERVICE---->
-    AppService,
-
     // <----INTERCEPTOR---->
     {
       provide: APP_INTERCEPTOR,

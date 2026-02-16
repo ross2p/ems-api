@@ -21,10 +21,10 @@ import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { CategoryFilterDto } from './dto/category-filter.dto';
-import { ResponseMessage, UserDetails } from 'src/decorators';
-import { AuthGuard } from 'src/guards/user.guard';
+import { ResponseMessage, UserDetails } from '../../decorators';
+import { AuthGuard } from '../../guards/user.guard';
 import { UserEntity } from '../user/user.entity';
-import { ValidationPipe } from 'src/pipes/validation.pipe';
+import { ValidationPipe } from '../../pipes/validation.pipe';
 import { createCategorySchema } from './schemas/create-category.schema';
 import { updateCategorySchema } from './schemas/update-category.schema';
 
