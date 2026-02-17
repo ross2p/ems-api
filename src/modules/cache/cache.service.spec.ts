@@ -19,7 +19,7 @@ describe('CacheService', () => {
         CacheService,
         {
           provide: CACHE_MANAGER,
-          useValue: createMock<CategoryService>(),
+          useValue: createMock<Cache>(),
         },
       ],
     }).compile();

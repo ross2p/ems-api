@@ -7,7 +7,6 @@ import { UpdateAttendanceDto } from './dtos/update-attendance.dto';
 import { AttendanceFilterDto } from './dtos/attendance-filter.dto';
 import { NotFoundException } from '@nestjs/common';
 import { PageResponse } from '../../utils/pageables/page-response.utils';
-import { PageRequest } from 'src/utils/pageables/page-request.utils';
 import { AttendanceEntity } from './attendance.entity';
 
 const mockAttendance = {
