@@ -17,7 +17,6 @@ export class UserService {
 
   async createUser(newUser: CreateUserDto) {
     newUser.password = await this.hashPassword(newUser.password);
-    console.log('newUser', newUser);
     return this.userRepository.createUser(newUser);
   }
 

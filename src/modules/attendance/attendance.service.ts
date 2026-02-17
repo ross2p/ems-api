@@ -4,10 +4,11 @@ import { checkExists } from '../../utils';
 import { CreateAttendanceDto } from './dtos/create-attendance.dto';
 import { UpdateAttendanceDto } from './dtos/update-attendance.dto';
 import { AttendanceFilterDto } from './dtos/attendance-filter.dto';
+import { PageResponse } from '../../utils/pageables/page-response.utils';
 
 @Injectable()
 export class AttendanceService {
-  constructor(private attendanceRepository: AttendanceRepository) {}
+  constructor(private readonly attendanceRepository: AttendanceRepository) {}
 
   async createAttendance(createAttendanceDto: CreateAttendanceDto) {
     return this.attendanceRepository.createAttendance(createAttendanceDto);
@@ -21,7 +22,9 @@ export class AttendanceService {
   }
 
   async findAllAttendance(attendanceFilterDto: AttendanceFilterDto) {
-    return this.attendanceRepository.findAllAttendance(attendanceFilterDto);
+    const { attendances, count } =
+      await this.attendanceRepository.findAllAttendance(attendanceFilterDto);
+    return new PageResponse(attendanceFilterDto, attendances, count);
   }
 
   async findAttendanceByUserId(userId: string) {

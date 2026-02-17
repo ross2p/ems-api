@@ -3,7 +3,7 @@ import type { AnySchema, ValidationResult } from 'joi';
 
 @Injectable()
 export class ValidationPipe<T = unknown> implements PipeTransform {
-  constructor(private schema: AnySchema<T>) {}
+  constructor(private readonly schema: AnySchema<T>) {}
 
   transform(value: T) {
     const validationResult: ValidationResult = this.schema.validate(value, {

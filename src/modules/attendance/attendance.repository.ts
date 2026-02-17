@@ -24,11 +24,17 @@ export class AttendanceRepository {
   }
 
   async findAllAttendance(attendanceFilterDto: AttendanceFilterDto) {
-    return this.attendanceRepository.findMany({
-      where: { eventId: attendanceFilterDto.eventId },
-      skip: attendanceFilterDto.skip,
-      take: attendanceFilterDto.pageSize,
-    });
+    const [attendances, count] = await Promise.all([
+      this.attendanceRepository.findMany({
+        where: { eventId: attendanceFilterDto.eventId },
+        skip: attendanceFilterDto.skip,
+        take: attendanceFilterDto.pageSize,
+      }),
+      this.attendanceRepository.count({
+        where: { eventId: attendanceFilterDto.eventId },
+      }),
+    ]);
+    return { attendances, count };
   }
 
   async findAttendanceByUserId(userId: string) {

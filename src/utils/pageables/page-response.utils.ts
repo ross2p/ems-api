@@ -19,16 +19,14 @@ export class PageResponse<T> {
 
   public map<U>(
     callbackFn: (value: T, index: number, array: T[]) => U,
-    thisArg?: any,
   ): PageResponse<U> {
     return new PageResponse<U>(
       {
         pageNumber: this.pageNumber,
         pageSize: this.pageSize,
       } as PageRequest,
-      this.content.map(
-        (element, index, array) => callbackFn(element, index, array),
-        thisArg,
+      this.content.map((element, index, array) =>
+        callbackFn(element, index, array),
       ),
       this.totalCount,
     );

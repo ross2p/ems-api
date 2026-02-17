@@ -81,10 +81,7 @@ describe('UserService', () => {
 
       const result = await userService.createUser(createUserDto);
 
-      expect(bcrypt.hash).toHaveBeenCalledWith(
-        createUserDto.password,
-        expect.anything(),
-      );
+      expect(bcrypt.hash).toHaveBeenCalledWith('password', expect.anything());
       expect(userRepository.createUser).toHaveBeenCalledWith({
         ...createUserDto,
         password: hashedPassword,
@@ -115,10 +112,11 @@ describe('UserService', () => {
 
       expect(updatedUser).toBe(newUser);
       expect(bcrypt.hash).toHaveBeenCalledWith(
-        newUser.password,
+        'newPassword',
         expect.anything(),
       );
       expect(userRepository.updateUser).toHaveBeenCalledWith(mockUser.id, {
+        ...updateUserDto,
         password: 'hashedPassword',
       });
     });
