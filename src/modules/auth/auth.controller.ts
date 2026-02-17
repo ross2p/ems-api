@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UsePipes } from '@nestjs/common';
+import { Body, Controller, HttpCode, Post, UsePipes } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { LoginDto } from './dtos/login.dto';
 import { AuthService } from './auth.service';
@@ -17,6 +17,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
+  @HttpCode(200)
   @UsePipes(new ValidationPipe(loginSchema))
   @ApiOperation({ summary: 'Login user' })
   @ApiResponse({
@@ -43,6 +44,7 @@ export class AuthController {
   }
 
   @Post('refresh')
+  @HttpCode(200)
   @UsePipes(new ValidationPipe(refreshTokenSchema))
   @ApiOperation({ summary: 'Refresh access token' })
   @ApiResponse({
