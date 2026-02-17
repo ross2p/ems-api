@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { PageRequest } from 'src/utils/pageables/page-request.utils';
+import { PageRequest } from '../../../utils/pageables/page-request.utils';
 
 export class AttendanceFilterDto extends PageRequest {
   @ApiProperty({

@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { CategoryRepository } from './category.repository';
-import { checkExists } from 'src/utils';
+import { checkExists } from '../../utils';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { CategoryFilterDto } from './dto/category-filter.dto';
 
 @Injectable()
 export class CategoryService {
-  constructor(private categoryRepository: CategoryRepository) {}
+  constructor(private readonly categoryRepository: CategoryRepository) {}
 
   async findPageableCategories(filters: CategoryFilterDto) {
     const [categories, totalCount] = await Promise.all([

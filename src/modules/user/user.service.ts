@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { UserRepository } from './user.repository';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
-import { checkExists, SALT_ROUND } from 'src/utils';
+import { checkExists, SALT_ROUND } from '../../utils';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -16,9 +16,7 @@ export class UserService {
   }
 
   async createUser(newUser: CreateUserDto) {
-    if (newUser.password) {
-      newUser.password = await this.hashPassword(newUser.password);
-    }
+    newUser.password = await this.hashPassword(newUser.password);
     return this.userRepository.createUser(newUser);
   }
 
@@ -40,6 +38,9 @@ export class UserService {
   }
 
   async findUserByEmailWithPassword(email: string) {
-    return checkExists(this.userRepository.findUserByEmailWithPassword(email), "User Not found");
+    return checkExists(
+      this.userRepository.findUserByEmailWithPassword(email),
+      'User Not found',
+    );
   }
 }

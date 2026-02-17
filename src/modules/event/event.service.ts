@@ -3,7 +3,7 @@ import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { EventFilterDto } from './dto/event-filter.dto';
 import { EventRepository } from './event.repository';
-import { checkExists } from 'src/utils';
+import { checkExists } from '../../utils';
 
 @Injectable()
 export class EventService {

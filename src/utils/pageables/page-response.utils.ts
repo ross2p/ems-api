@@ -9,10 +9,7 @@ export class PageResponse<T> {
 
   constructor(pageRequest: PageRequest, content: T[], totalCount: number) {
     this.pageNumber = pageRequest.pageNumber;
-    this.pageSize =
-      content.length < pageRequest.pageSize
-        ? content.length
-        : pageRequest.pageSize;
+    this.pageSize = Math.min(content.length, pageRequest.pageSize);
     this.pageCount = Math.ceil(
       totalCount / (this.pageSize === 0 ? pageRequest.pageSize : this.pageSize),
     );
@@ -22,14 +19,15 @@ export class PageResponse<T> {
 
   public map<U>(
     callbackFn: (value: T, index: number, array: T[]) => U,
-    thisArg?: any,
   ): PageResponse<U> {
     return new PageResponse<U>(
       {
         pageNumber: this.pageNumber,
         pageSize: this.pageSize,
       } as PageRequest,
-      this.content.map(callbackFn, thisArg),
+      this.content.map((element, index, array) =>
+        callbackFn(element, index, array),
+      ),
       this.totalCount,
     );
   }

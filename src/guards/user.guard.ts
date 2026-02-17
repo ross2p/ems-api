@@ -29,7 +29,7 @@ export class AuthGuard implements CanActivate {
     const user: UserEntity = await this.authService.validateAccessToken(token);
 
     if (!user) {
-      throw new UnauthorizedException('c token or user not found');
+      throw new UnauthorizedException('Missing token or user not found');
     }
 
     req.user = user;

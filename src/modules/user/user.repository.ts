@@ -2,12 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
-import { UserEntity } from './user.entity';
 import { Prisma } from '../../../generated/prisma/client';
-
-const selectWithPassword: Record<keyof UserEntity, true> = Object.fromEntries(
-  Object.keys(new UserEntity()).map((key) => [key, true]),
-) as Record<keyof UserEntity, true>;
 
 @Injectable()
 export class UserRepository {
@@ -27,7 +22,7 @@ export class UserRepository {
   async findUserByEmailWithPassword(email: string) {
     return this.userRepository.findUnique({
       where: { email },
-      select: selectWithPassword,
+      omit: { password: false },
     });
   }
 

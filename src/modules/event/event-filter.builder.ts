@@ -1,7 +1,7 @@
 import { Prisma } from 'generated/prisma';
 
 export class EventFilterBuilder {
-  private whereClause: Prisma.EventWhereInput = {};
+  private readonly whereClause: Prisma.EventWhereInput = {};
   private orderByClause: Prisma.EventOrderByWithRelationInput = {
     createdAt: 'desc',
   };
@@ -98,17 +98,7 @@ export class EventFilterBuilder {
     sortOrder: 'asc' | 'desc' = 'asc',
   ): this {
     if (sortBy) {
-      switch (sortBy) {
-        case 'date':
-          this.orderByClause = { startDate: sortOrder };
-          break;
-        case 'title':
-          this.orderByClause = { title: sortOrder };
-          break;
-        case 'createdAt':
-          this.orderByClause = { createdAt: sortOrder };
-          break;
-      }
+      this.orderByClause = { ...this.orderByClause, [sortBy]: sortOrder };
     }
     return this;
   }

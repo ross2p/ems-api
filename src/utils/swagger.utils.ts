@@ -3,7 +3,7 @@ import { OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import basicAuth from 'express-basic-auth';
 import { ConfigService } from '@nestjs/config';
-import { swaggerConfig } from 'src/configs/swagger.config';
+import { swaggerConfig } from '../configs/swagger.config';
 
 export const swaggerSetup = (
   app: INestApplication,

@@ -1,11 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
+import { DEFAULT_TTL } from './cache.constants';
 
 @Injectable()
 export class CacheService {
-  private readonly DEFAULT_TTL = 300000;
+  private readonly DEFAULT_TTL = DEFAULT_TTL;
 
-  constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
+  constructor(@Inject(CACHE_MANAGER) private readonly cacheManager: Cache) {}
 
   async getOrSet<T>(
     key: string,
