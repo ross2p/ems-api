@@ -1,5 +1,7 @@
 import request from 'supertest';
+import { HttpStatus } from '@nestjs/common';
 import { setupE2ETestEnvironment } from '../../utils/e2e-setup.util';
+import { VALIDATION_MESSAGE } from '../../utils/constants';
 
 describe('AuthController (e2e)', () => {
   const env = setupE2ETestEnvironment();
@@ -9,7 +11,7 @@ describe('AuthController (e2e)', () => {
       const registerDto = {
         firstName: 'Test',
         lastName: 'User',
-        email: 'test@example.com',
+        email: 'test-register@example.com',
         password: 'password123',
       };
 
@@ -29,23 +31,55 @@ describe('AuthController (e2e)', () => {
       const registerDto = {
         firstName: 'Test',
         lastName: 'User',
-        email: 'test@example.com',
+        email: 'test-duplicate@example.com',
         password: 'password123',
       };
 
-      // Register first time
       await request(env.app.getHttpServer())
         .post('/auth/register')
         .send(registerDto)
-        .expect(201);
+        .expect(HttpStatus.CREATED);
 
-      // Try registering again
       const response = await request(env.app.getHttpServer())
         .post('/auth/register')
         .send(registerDto)
-        .expect(500); // Unique constraint throws Prisma Client Error (caught as 500)
+        .expect(HttpStatus.CONFLICT);
 
-      expect(response.body.statusCode).toBe(500);
+      expect(response.body.statusCode).toBe(HttpStatus.CONFLICT);
+    });
+
+    it('should fail validation when fields are missing', async () => {
+      const response = await request(env.app.getHttpServer())
+        .post('/auth/register')
+        .send({})
+        .expect(HttpStatus.BAD_REQUEST);
+
+      expect(response.body.message).toBe(VALIDATION_MESSAGE);
+      expect(response.body.data.data).toContainEqual({
+        path: 'firstName',
+        message: 'First name is required',
+      });
+      expect(response.body.data.data).toContainEqual({
+        path: 'email',
+        message: 'Email is required',
+      });
+    });
+    it('should fail validation with invalid email format', async () => {
+      const registerDto = {
+        firstName: 'Test',
+        lastName: 'User',
+        email: 'invalid-email',
+        password: 'password123',
+      };
+
+      const response = await request(env.app.getHttpServer())
+        .post('/auth/register')
+        .send(registerDto)
+        .expect(400);
+
+      expect(response.body.message).toBe(VALIDATION_MESSAGE);
+      const str = JSON.stringify(response.body.data);
+      expect(str).toContain('Email must be a valid email');
     });
   });
 
@@ -58,21 +92,20 @@ describe('AuthController (e2e)', () => {
         password: 'password123',
       };
 
-      // Need to register before login
       await request(env.app.getHttpServer())
         .post('/auth/register')
         .send(registerDto)
-        .expect(201);
+        .expect(HttpStatus.CREATED);
 
       const loginDto = {
-        email: 'testlogin@example.com',
+        email: registerDto.email,
         password: 'password123',
       };
 
       const response = await request(env.app.getHttpServer())
         .post('/auth/login')
         .send(loginDto)
-        .expect(200);
+        .expect(HttpStatus.OK);
 
       expect(response.body.message).toBe('User logged in successfully');
       expect(response.body.data).toHaveProperty('user');
@@ -92,17 +125,43 @@ describe('AuthController (e2e)', () => {
       await request(env.app.getHttpServer())
         .post('/auth/register')
         .send(registerDto)
-        .expect(201);
+        .expect(HttpStatus.CREATED);
 
       const loginDto = {
-        email: 'testlogin2@example.com',
+        email: registerDto.email,
         password: 'wrongpassword',
       };
 
-      await request(env.app.getHttpServer())
+      const response = await request(env.app.getHttpServer())
         .post('/auth/login')
         .send(loginDto)
-        .expect(400); // Invalid credentials returns Bad Request
+        .expect(HttpStatus.BAD_REQUEST);
+
+      expect(response.body.message).toBe('Invalid credentials');
+    });
+    it('should fail login with invalid email', async () => {
+      const loginDto = {
+        email: 'testlogin3@example.com',
+        password: 'password123',
+      };
+
+      const response = await request(env.app.getHttpServer())
+        .post('/auth/login')
+        .send(loginDto)
+        .expect(HttpStatus.BAD_REQUEST);
+      expect(response.body.message).toBe('Invalid credentials');
+    });
+
+    it('should fail login validation with empty body', async () => {
+      const response = await request(env.app.getHttpServer())
+        .post('/auth/login')
+        .send({})
+        .expect(HttpStatus.BAD_REQUEST);
+
+      expect(response.body.message).toBe(VALIDATION_MESSAGE);
+      const str = JSON.stringify(response.body.data);
+      expect(str).toContain('Email is required');
+      expect(str).toContain('Password is required');
     });
   });
 
@@ -118,17 +177,36 @@ describe('AuthController (e2e)', () => {
       const registerResponse = await request(env.app.getHttpServer())
         .post('/auth/register')
         .send(registerDto)
-        .expect(201);
+        .expect(HttpStatus.CREATED);
 
       const refreshToken = registerResponse.body.data.refreshToken;
 
       const refreshResponse = await request(env.app.getHttpServer())
         .post('/auth/refresh')
         .send({ refreshToken })
-        .expect(200);
+        .expect(HttpStatus.OK);
 
       expect(refreshResponse.body.message).toBe('Token refreshed successfully');
       expect(refreshResponse.body.data).toHaveProperty('accessToken');
+    });
+
+    it('should fail to refresh with invalid token', async () => {
+      await request(env.app.getHttpServer())
+        .post('/auth/refresh')
+        .send({ refreshToken: 'invalid-token-string' })
+        .expect(400);
+    });
+
+    it('should fail to refresh with empty body', async () => {
+      const response = await request(env.app.getHttpServer())
+        .post('/auth/refresh')
+        .send({})
+        .expect(400);
+
+      expect(response.body.message).toBe(VALIDATION_MESSAGE);
+      expect(JSON.stringify(response.body.data)).toContain(
+        'Refresh token is required',
+      );
     });
   });
 });

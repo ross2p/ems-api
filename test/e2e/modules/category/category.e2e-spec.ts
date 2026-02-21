@@ -1,6 +1,7 @@
 import request from 'supertest';
 import { setupE2ETestEnvironment } from '../../utils/e2e-setup.util';
-import { getAuthDetails } from '../../utils/e2e-helpers.util';
+import { getAuthDetails } from '../../../e2e/utils/get-auth-details.utils';
+import { randomUUID } from 'node:crypto';
 
 describe('CategoryController (e2e)', () => {
   const env = setupE2ETestEnvironment();
@@ -60,6 +61,7 @@ describe('CategoryController (e2e)', () => {
       expect(response.body.message).toBe('Categories retrieved successfully');
       expect(response.body.data.content.length).toBeGreaterThanOrEqual(2);
     });
+    //todo if user unauthorized
   });
 
   describe('/category/:id (GET)', () => {
@@ -84,11 +86,14 @@ describe('CategoryController (e2e)', () => {
     });
 
     it('should fail with 404 if category not found', async () => {
-      // Valid UUID but random
+      const invalidCategoryId = randomUUID();
       await request(env.app.getHttpServer())
-        .get('/category/123e4567-e89b-12d3-a456-426614174000')
+        .get(`/category/${invalidCategoryId}`)
         .expect(404);
     });
+
+    //todo if categoryId is incorect
+    //todo if user unauthorized
   });
 
   describe('/category/:id (PATCH)', () => {
@@ -112,6 +117,10 @@ describe('CategoryController (e2e)', () => {
       expect(response.body.message).toBe('Category updated successfully');
       expect(response.body.data.name).toBe('New Name');
     });
+
+    //todo if categoryId is incorect
+    //todo if category not found
+    //todo if user unauthorized
   });
 
   describe('/category/:id (DELETE)', () => {
@@ -138,5 +147,8 @@ describe('CategoryController (e2e)', () => {
         .get(`/category/${categoryId}`)
         .expect(404);
     });
+    //todo if categoryId is incorect
+    //todo if category not found
+    //todo if user unauthorized
   });
 });

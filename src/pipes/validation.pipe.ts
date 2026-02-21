@@ -1,5 +1,6 @@
 import { PipeTransform, Injectable, BadRequestException } from '@nestjs/common';
 import type { AnySchema, ValidationResult } from 'joi';
+import { VALIDATION_MESSAGE } from '../utils';
 
 @Injectable()
 export class ValidationPipe<T = unknown> implements PipeTransform {
@@ -18,7 +19,7 @@ export class ValidationPipe<T = unknown> implements PipeTransform {
 
       throw new BadRequestException({
         data: formattedErrors,
-        message: 'Validation failed',
+        message: VALIDATION_MESSAGE,
       });
     }
 

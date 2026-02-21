@@ -87,6 +87,15 @@ describe('UserRepository', () => {
     });
   });
 
+  describe('findUserByEmail', () => {
+    it('should find user by email and include password', async () => {
+      databaseService.user.findUnique.mockResolvedValue(mockUser);
+
+      const result = await repository.findUserByEmail(mockUser.email);
+
+      expect(result).toEqual(mockUser);
+    });
+  });
   describe('updateUser', () => {
     it('should update user', async () => {
       const updateUserDto: UpdateUserDto = { firstName: 'Updated' };

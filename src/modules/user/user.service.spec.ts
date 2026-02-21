@@ -3,7 +3,7 @@ import { UserService } from './user.service';
 import { UserRepository } from './user.repository';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
-import { NotFoundException } from '@nestjs/common';
+import { ConflictException, NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { UserEntity } from './user.entity';
@@ -77,6 +77,7 @@ describe('UserService', () => {
         password: 'password',
       };
 
+      userRepository.findUserByEmail.mockResolvedValue(null);
       userRepository.createUser.mockResolvedValue(mockUser);
 
       const result = await userService.createUser(createUserDto);
@@ -87,6 +88,21 @@ describe('UserService', () => {
         password: hashedPassword,
       });
       expect(result).toEqual(mockUser);
+    });
+
+    it('should throw ConflictException, if user exist', async () => {
+      const createUserDto: CreateUserDto = {
+        email: mockUser.email,
+        firstName: mockUser.firstName,
+        lastName: mockUser.lastName,
+        password: 'password',
+      };
+
+      userRepository.findUserByEmail.mockResolvedValue(mockUser);
+
+      await expect(userService.createUser(createUserDto)).rejects.toThrow(
+        ConflictException,
+      );
     });
   });
 

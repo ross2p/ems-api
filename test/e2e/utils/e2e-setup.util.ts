@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { AppModule } from '../../src/app.module';
-import { TestDatabaseEnvironment } from './database.util';
+import { AppModule } from '../../../src/app.module';
+import { TestDatabaseEnvironment } from '../../utils/database.util';
 
 export interface E2ETestEnvironment {
   app: INestApplication;

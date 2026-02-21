@@ -25,6 +25,7 @@ import { AuthGuard } from '../../guards/user.guard';
 import { ValidationPipe } from '../../pipes/validation.pipe';
 import { createAttendanceSchema } from './schemas/create-attendance.schema';
 import { updateAttendanceSchema } from './schemas/update-attendance.schema';
+import { uuidSchema } from '../../schemas/uuid.schema';
 
 @ApiBearerAuth()
 @Controller('attendance')
@@ -42,14 +43,16 @@ export class AttendanceController {
 
   @Post()
   @UseGuards(AuthGuard)
-  @UsePipes(new ValidationPipe(createAttendanceSchema))
   @ApiOperation({ summary: 'Create a new attendance record' })
   @ApiResponse({
     status: 201,
     description: 'Attendance record created successfully',
   })
   @ResponseMessage('Attendance record created successfully')
-  async createAttendance(@Body() createAttendanceDto: CreateAttendanceDto) {
+  async createAttendance(
+    @Body(new ValidationPipe(createAttendanceSchema))
+    createAttendanceDto: CreateAttendanceDto,
+  ) {
     return this.attendanceService.createAttendance(createAttendanceDto);
   }
 
@@ -59,7 +62,9 @@ export class AttendanceController {
   @ApiParam({ name: 'id', description: 'Attendance ID' })
   @ApiResponse({ status: 200, description: 'Attendance record found' })
   @ResponseMessage('Attendance record found successfully')
-  async getAttendanceById(@Param('id') attendanceId: string) {
+  async getAttendanceById(
+    @Param('id', new ValidationPipe(uuidSchema)) attendanceId: string,
+  ) {
     return this.attendanceService.findAttendanceByIdOrThrow(attendanceId);
   }
 
@@ -69,7 +74,9 @@ export class AttendanceController {
   @ApiParam({ name: 'userId', description: 'User ID' })
   @ApiResponse({ status: 200, description: 'User attendance records' })
   @ResponseMessage('User attendance records retrieved successfully')
-  async getAttendanceByUserId(@Param('userId') userId: string) {
+  async getAttendanceByUserId(
+    @Param('userId', new ValidationPipe(uuidSchema)) userId: string,
+  ) {
     return this.attendanceService.findAttendanceByUserId(userId);
   }
 
@@ -79,13 +86,14 @@ export class AttendanceController {
   @ApiParam({ name: 'eventId', description: 'Event ID' })
   @ApiResponse({ status: 200, description: 'Event attendance records' })
   @ResponseMessage('Event attendance records retrieved successfully')
-  async getAttendanceByEventId(@Param('eventId') eventId: string) {
+  async getAttendanceByEventId(
+    @Param('eventId', new ValidationPipe(uuidSchema)) eventId: string,
+  ) {
     return this.attendanceService.findAttendanceByEventId(eventId);
   }
 
   @Patch(':id')
   @UseGuards(AuthGuard)
-  @UsePipes(new ValidationPipe(updateAttendanceSchema))
   @ApiOperation({ summary: 'Update attendance record by ID' })
   @ApiParam({ name: 'id', description: 'Attendance ID' })
   @ApiResponse({
@@ -94,8 +102,9 @@ export class AttendanceController {
   })
   @ResponseMessage('Attendance record updated successfully')
   async updateAttendance(
-    @Param('id') attendanceId: string,
-    @Body() updateAttendanceDto: UpdateAttendanceDto,
+    @Param('id', new ValidationPipe(uuidSchema)) attendanceId: string,
+    @Body(new ValidationPipe(updateAttendanceSchema))
+    updateAttendanceDto: UpdateAttendanceDto,
   ) {
     return this.attendanceService.updateAttendance(
       attendanceId,
@@ -112,7 +121,9 @@ export class AttendanceController {
     description: 'Attendance record deleted successfully',
   })
   @ResponseMessage('Attendance record deleted successfully')
-  async deleteAttendance(@Param('id') attendanceId: string) {
+  async deleteAttendance(
+    @Param('id', new ValidationPipe(uuidSchema)) attendanceId: string,
+  ) {
     return this.attendanceService.deleteAttendance(attendanceId);
   }
 }

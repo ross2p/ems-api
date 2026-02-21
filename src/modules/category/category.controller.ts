@@ -8,7 +8,6 @@ import {
   Post,
   Query,
   UseGuards,
-  UsePipes,
 } from '@nestjs/common';
 import {
   ApiOperation,
@@ -27,6 +26,7 @@ import { UserEntity } from '../user/user.entity';
 import { ValidationPipe } from '../../pipes/validation.pipe';
 import { createCategorySchema } from './schemas/create-category.schema';
 import { updateCategorySchema } from './schemas/update-category.schema';
+import { uuidSchema } from '../../schemas/uuid.schema';
 
 @ApiTags('Categories')
 @ApiBearerAuth()
@@ -61,7 +61,9 @@ export class CategoryController {
   @ApiParam({ name: 'id', description: 'Category ID' })
   @ApiResponse({ status: 200, description: 'Category found' })
   @ResponseMessage('Category found successfully')
-  async getCategoryById(@Param('id') categoryId: string) {
+  async getCategoryById(
+    @Param('id', new ValidationPipe(uuidSchema)) categoryId: string,
+  ) {
     return this.categoryService.findCategoryByIdOrThrow(categoryId);
   }
 
@@ -72,7 +74,7 @@ export class CategoryController {
   @ApiResponse({ status: 200, description: 'Category updated successfully' })
   @ResponseMessage('Category updated successfully')
   async updateCategory(
-    @Param('id') categoryId: string,
+    @Param('id', new ValidationPipe(uuidSchema)) categoryId: string,
     @Body(new ValidationPipe(updateCategorySchema))
     updateCategoryDto: UpdateCategoryDto,
   ) {
@@ -85,7 +87,9 @@ export class CategoryController {
   @ApiParam({ name: 'id', description: 'Category ID' })
   @ApiResponse({ status: 200, description: 'Category deleted successfully' })
   @ResponseMessage('Category deleted successfully')
-  async deleteCategory(@Param('id') categoryId: string) {
+  async deleteCategory(
+    @Param('id', new ValidationPipe(uuidSchema)) categoryId: string,
+  ) {
     return this.categoryService.deleteCategory(categoryId);
   }
 }

@@ -23,7 +23,9 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "test:integration": "jest --config ./test/jest-integration.json --coverage",
+    "test:perf": "k6 run test/performance/k6-load-test.js"
   },
   "dependencies": {
     "@golevelup/ts-jest": "^1.2.1",
@@ -69,6 +71,7 @@
     "eslint-plugin-prettier": "^5.2.2",
     "globals": "^16.0.0",
     "jest": "^30.0.0",
+    "k6": "^0.0.0",
     "prettier": "^3.4.2",
     "prisma": "^7.0.1",
     "should": "^13.2.3",

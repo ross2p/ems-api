@@ -8,7 +8,6 @@ import {
   Post,
   Query,
   UseGuards,
-  UsePipes,
 } from '@nestjs/common';
 import {
   ApiOperation,
@@ -43,6 +42,7 @@ export class EventController {
   ) {}
 
   @Get()
+  @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Get all events with pagination and filtering' })
   @ApiResponse({ status: 200, description: 'List of events' })
   @ResponseMessage('Events retrieved successfully')
@@ -64,6 +64,7 @@ export class EventController {
   }
 
   @Get(':id')
+  @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Get event by ID' })
   @ApiParam({ name: 'id', description: 'Event ID' })
   @ApiResponse({ status: 200, description: 'Event found' })
