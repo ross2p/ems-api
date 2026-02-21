@@ -35,6 +35,7 @@ export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
   @Get()
+  @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Get all categories with pagination and search' })
   @ApiResponse({ status: 200, description: 'List of categories' })
   @ResponseMessage('Categories retrieved successfully')
@@ -57,6 +58,7 @@ export class CategoryController {
   }
 
   @Get(':id')
+  @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Get category by ID' })
   @ApiParam({ name: 'id', description: 'Category ID' })
   @ApiResponse({ status: 200, description: 'Category found' })

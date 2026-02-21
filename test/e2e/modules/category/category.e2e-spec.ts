@@ -56,12 +56,15 @@ describe('CategoryController (e2e)', () => {
 
       const response = await request(env.app.getHttpServer())
         .get('/category')
+        .set('Authorization', `Bearer ${token}`)
         .expect(200);
 
       expect(response.body.message).toBe('Categories retrieved successfully');
       expect(response.body.data.content.length).toBeGreaterThanOrEqual(2);
     });
-    //todo if user unauthorized
+    it('should fail with 401 if user unauthorized', async () => {
+      await request(env.app.getHttpServer()).get('/category').expect(401);
+    });
   });
 
   describe('/category/:id (GET)', () => {
@@ -78,6 +81,7 @@ describe('CategoryController (e2e)', () => {
 
       const response = await request(env.app.getHttpServer())
         .get(`/category/${categoryId}`)
+        .set('Authorization', `Bearer ${token}`)
         .expect(200);
 
       expect(response.body.message).toBe('Category found successfully');
@@ -86,14 +90,28 @@ describe('CategoryController (e2e)', () => {
     });
 
     it('should fail with 404 if category not found', async () => {
+      const { token } = await getAuthDetails(env.app);
       const invalidCategoryId = randomUUID();
       await request(env.app.getHttpServer())
         .get(`/category/${invalidCategoryId}`)
+        .set('Authorization', `Bearer ${token}`)
         .expect(404);
     });
 
-    //todo if categoryId is incorect
-    //todo if user unauthorized
+    it('should fail with 400 if categoryId is incorrect format', async () => {
+      const { token } = await getAuthDetails(env.app);
+      await request(env.app.getHttpServer())
+        .get('/category/invalid-uuid')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(400);
+    });
+
+    it('should fail with 401 if user unauthorized', async () => {
+      const invalidCategoryId = randomUUID();
+      await request(env.app.getHttpServer())
+        .get(`/category/${invalidCategoryId}`)
+        .expect(401);
+    });
   });
 
   describe('/category/:id (PATCH)', () => {
@@ -118,9 +136,32 @@ describe('CategoryController (e2e)', () => {
       expect(response.body.data.name).toBe('New Name');
     });
 
-    //todo if categoryId is incorect
-    //todo if category not found
-    //todo if user unauthorized
+    it('should fail with 400 if categoryId is incorrect format', async () => {
+      const { token } = await getAuthDetails(env.app);
+      await request(env.app.getHttpServer())
+        .patch('/category/invalid-uuid')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'New Name' })
+        .expect(400);
+    });
+
+    it('should fail with 404 if category not found', async () => {
+      const { token } = await getAuthDetails(env.app);
+      const invalidCategoryId = randomUUID();
+      await request(env.app.getHttpServer())
+        .patch(`/category/${invalidCategoryId}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'New Name' })
+        .expect(404);
+    });
+
+    it('should fail to update category when unauthorized', async () => {
+      const invalidCategoryId = randomUUID();
+      await request(env.app.getHttpServer())
+        .patch(`/category/${invalidCategoryId}`)
+        .send({ name: 'New Name' })
+        .expect(401);
+    });
   });
 
   describe('/category/:id (DELETE)', () => {
@@ -145,10 +186,31 @@ describe('CategoryController (e2e)', () => {
       // Verify it's gone
       await request(env.app.getHttpServer())
         .get(`/category/${categoryId}`)
+        .set('Authorization', `Bearer ${token}`)
         .expect(404);
     });
-    //todo if categoryId is incorect
-    //todo if category not found
-    //todo if user unauthorized
+    it('should fail with 400 if categoryId is incorrect format', async () => {
+      const { token } = await getAuthDetails(env.app);
+      await request(env.app.getHttpServer())
+        .delete('/category/invalid-uuid')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(400);
+    });
+
+    it('should fail with 404 if category not found', async () => {
+      const { token } = await getAuthDetails(env.app);
+      const invalidCategoryId = randomUUID();
+      await request(env.app.getHttpServer())
+        .delete(`/category/${invalidCategoryId}`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(404);
+    });
+
+    it('should fail to delete category when unauthorized', async () => {
+      const invalidCategoryId = randomUUID();
+      await request(env.app.getHttpServer())
+        .delete(`/category/${invalidCategoryId}`)
+        .expect(401);
+    });
   });
 });
