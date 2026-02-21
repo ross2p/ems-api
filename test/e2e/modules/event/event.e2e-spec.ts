@@ -1,12 +1,12 @@
 import request from 'supertest';
 import { randomUUID } from 'node:crypto';
-import { setupE2ETestEnvironment } from '../../utils/e2e-setup.util';
+import { setupTestEnvironment } from '../../../utils/test-setup.util';
 import { getAuthDetails } from '../../../e2e/utils/get-auth-details.utils';
 import { HttpStatus } from '@nestjs/common';
 import { VALIDATION_MESSAGE } from '../../utils/constants';
 
 describe('EventController (e2e)', () => {
-  const env = setupE2ETestEnvironment();
+  const env = setupTestEnvironment();
 
   let token1: string;
   let userId1: string;

@@ -24,8 +24,8 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "test:integration": "jest --config ./test/jest-integration.json --coverage",
-    "test:perf": "k6 run test/performance/k6-load-test.js"
+    "test:integration": "jest --config ./test/jest-integration.json",
+    "test:performance": "ts-node test/performance/main.ts"
   },
   "dependencies": {
     "@golevelup/ts-jest": "^1.2.1",
@@ -65,6 +65,7 @@
     "@types/jest": "^30.0.0",
     "@types/node": "^22.10.7",
     "@types/supertest": "^6.0.2",
+    "artillery": "^2.0.30",
     "dotenv": "^17.2.3",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",

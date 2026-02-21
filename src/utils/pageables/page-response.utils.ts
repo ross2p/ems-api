@@ -1,11 +1,11 @@
 import { PageRequest } from './page-request.utils';
 
 export class PageResponse<T> {
-  private readonly totalCount: number;
-  private readonly pageNumber: number;
-  private readonly pageSize: number;
-  private readonly pageCount?: number;
-  private readonly content: T[];
+  public readonly totalCount: number;
+  public readonly pageNumber: number;
+  public readonly pageSize: number;
+  public readonly pageCount?: number;
+  public readonly content: T[];
 
   constructor(pageRequest: PageRequest, content: T[], totalCount: number) {
     this.pageNumber = pageRequest.pageNumber;

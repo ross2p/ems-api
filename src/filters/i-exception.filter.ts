@@ -11,7 +11,7 @@ export abstract class IExceptionHandler<
   catch(exception: T, host: ArgumentsHost) {
     const contextType = host.getType();
     const result = this.handle(exception);
-    // this.logger.error(`Exception: ${String(exception)}`, exception as Error);
+    this.logger.error(`Exception: ${String(exception)}`, exception as Error);
 
     switch (contextType) {
       case 'http': {

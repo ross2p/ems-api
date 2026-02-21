@@ -1,0 +1,24 @@
+config:
+  phases:
+    - duration: 60
+      arrivalRate: 5
+      name: '1 Minute Soak (Demo)'
+  processor: './processor.js'
+scenarios:
+  - name: 'Constant low load'
+    flow:
+      - function: 'generateUserData'
+      - post:
+          url: '/auth/register'
+          json:
+            email: '{{ email }}'
+            password: '{{ password }}'
+            firstName: '{{ firstName }}'
+            lastName: '{{ lastName }}'
+          capture:
+            - json: '$.data.accessToken'
+              as: 'token'
+      - get:
+          url: '/event'
+          headers:
+            authorization: 'Bearer {{ token }}'

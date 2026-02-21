@@ -1,10 +1,10 @@
 import request from 'supertest';
 import { HttpStatus } from '@nestjs/common';
-import { setupE2ETestEnvironment } from '../../utils/e2e-setup.util';
+import { setupTestEnvironment } from '../../../utils/test-setup.util';
 import { VALIDATION_MESSAGE } from '../../utils/constants';
 
 describe('AuthController (e2e)', () => {
-  const env = setupE2ETestEnvironment();
+  const env = setupTestEnvironment();
 
   describe('/auth/register (POST)', () => {
     it('should successfully register a new user', async () => {

@@ -1,0 +1,17 @@
+config:
+  phases:
+    - duration: 20
+      arrivalRate: 30
+      name: 'Heavy Auth Load'
+  processor: './processor.js'
+scenarios:
+  - name: 'Register User'
+    flow:
+      - function: 'generateUserData'
+      - post:
+          url: '/auth/register'
+          json:
+            email: '{{ email }}'
+            password: '{{ password }}'
+            firstName: '{{ firstName }}'
+            lastName: '{{ lastName }}'

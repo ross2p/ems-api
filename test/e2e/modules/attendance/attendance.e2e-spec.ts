@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { setupE2ETestEnvironment } from '../../utils/e2e-setup.util';
+import { setupTestEnvironment } from '../../../utils/test-setup.util';
 import { getAuthDetails } from '../../../e2e/utils/get-auth-details.utils';
 import { createEvent } from '../../utils/create-event.utils';
 import { VALIDATION_MESSAGE } from '../../utils/constants';
@@ -7,7 +7,7 @@ import { randomUUID } from 'node:crypto';
 import { HttpStatus } from '@nestjs/common';
 
 describe('AttendanceController (e2e)', () => {
-  const env = setupE2ETestEnvironment();
+  const env = setupTestEnvironment();
 
   let token1: string;
   let userId1: string;

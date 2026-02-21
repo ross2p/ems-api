@@ -8,7 +8,6 @@ import {
   Post,
   Query,
   UseGuards,
-  UsePipes,
 } from '@nestjs/common';
 import {
   ApiOperation,

@@ -1,0 +1,41 @@
+config:
+  phases:
+    - duration: 30
+      arrivalRate: 5
+      name: 'Complete Journey Load'
+  processor: './processor.js'
+scenarios:
+  - name: 'User Journey'
+    flow:
+      - function: 'generateUserData'
+      - post:
+          url: '/auth/register'
+          json:
+            email: '{{ email }}'
+            password: '{{ password }}'
+            firstName: '{{ firstName }}'
+            lastName: '{{ lastName }}'
+          capture:
+            - json: '$.data.accessToken'
+              as: 'token'
+            - json: '$.data.user.id'
+              as: 'userId'
+      - get:
+          url: '/category'
+          headers:
+            authorization: 'Bearer {{ token }}'
+      - get:
+          url: '/event'
+          headers:
+            authorization: 'Bearer {{ token }}'
+      - post:
+          url: '/attendance'
+          headers:
+            authorization: 'Bearer {{ token }}'
+          json:
+            eventId: '{{ $processEnvironment.TARGET_EVENT_ID }}'
+            userId: '{{ userId }}'
+      - get:
+          url: '/user/me'
+          headers:
+            authorization: 'Bearer {{ token }}'

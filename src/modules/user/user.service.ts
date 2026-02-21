@@ -22,16 +22,20 @@ export class UserService {
     if (existingUser) {
       throw new ConflictException('User already exist');
     }
-    newUser.password = await this.hashPassword(newUser.password);
-    return this.userRepository.createUser(newUser);
+    const hashedPassword = await this.hashPassword(newUser.password);
+    return this.userRepository.createUser({
+      ...newUser,
+      password: hashedPassword,
+    });
   }
 
   async updateUser(userId: string, updateUserDto: UpdateUserDto) {
     await this.findUserByIdOrThrow(userId);
-    if (updateUserDto.password) {
-      updateUserDto.password = await this.hashPassword(updateUserDto.password);
+    const dataToUpdate = { ...updateUserDto };
+    if (dataToUpdate.password) {
+      dataToUpdate.password = await this.hashPassword(dataToUpdate.password);
     }
-    return this.userRepository.updateUser(userId, updateUserDto);
+    return this.userRepository.updateUser(userId, dataToUpdate);
   }
 
   private async hashPassword(password: string) {

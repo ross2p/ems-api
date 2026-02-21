@@ -1,0 +1,32 @@
+config:
+  phases:
+    - duration: 30
+      arrivalRate: 20
+      name: 'Sustained Load'
+  processor: './processor.js'
+scenarios:
+  - name: 'Browse Events'
+    flow:
+      - function: 'generateUserData'
+      - post:
+          url: '/auth/register'
+          json:
+            email: '{{ email }}'
+            password: '{{ password }}'
+            firstName: '{{ firstName }}'
+            lastName: '{{ lastName }}'
+          capture:
+            - json: '$.data.accessToken'
+              as: 'token'
+      - get:
+          url: '/event?limit=10&page=1'
+          headers:
+            authorization: 'Bearer {{ token }}'
+      - get:
+          url: '/category'
+          headers:
+            authorization: 'Bearer {{ token }}'
+      - get:
+          url: '/event?limit=5&page=1'
+          headers:
+            authorization: 'Bearer {{ token }}'

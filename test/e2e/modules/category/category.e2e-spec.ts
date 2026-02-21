@@ -1,10 +1,10 @@
 import request from 'supertest';
-import { setupE2ETestEnvironment } from '../../utils/e2e-setup.util';
+import { setupTestEnvironment } from '../../../utils/test-setup.util';
 import { getAuthDetails } from '../../../e2e/utils/get-auth-details.utils';
 import { randomUUID } from 'node:crypto';
 
 describe('CategoryController (e2e)', () => {
-  const env = setupE2ETestEnvironment();
+  const env = setupTestEnvironment();
 
   describe('/category (POST)', () => {
     it('should create a new category when authenticated', async () => {

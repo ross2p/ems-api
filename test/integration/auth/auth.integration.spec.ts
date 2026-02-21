@@ -1,11 +1,11 @@
-import { setupE2ETestEnvironment } from '../../../e2e/utils/e2e-setup.util';
+import { setupTestEnvironment } from '../../../utils/test-setup.util';
 import { AuthService } from '../../../../src/modules/auth/auth.service';
 import { CreateUserDto } from '../../../../src/modules/user/dtos/create-user.dto';
 import { LoginDto } from '../../../../src/modules/auth/dtos/login.dto';
 import { BadRequestException } from '@nestjs/common';
 
 describe('AuthService (Integration)', () => {
-  const env = setupE2ETestEnvironment();
+  const env = setupTestEnvironment();
   let authService: AuthService;
 
   beforeAll(() => {
@@ -108,6 +108,9 @@ describe('AuthService (Integration)', () => {
 
       const registerResult = await authService.register(dto);
       const oldAccessToken = registerResult.accessToken;
+
+      // Wait 1 second so the "iat" and "exp" claims in the new token are different, producing a different JWT string
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       const refreshResult = await authService.refreshToken({
         refreshToken: registerResult.refreshToken,

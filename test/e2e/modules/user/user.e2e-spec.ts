@@ -1,11 +1,11 @@
 import request from 'supertest';
-import { setupE2ETestEnvironment } from '../../utils/e2e-setup.util';
+import { setupTestEnvironment } from '../../../utils/test-setup.util';
 import { getAuthDetails } from '../../../e2e/utils/get-auth-details.utils';
 import { HttpStatus } from '@nestjs/common';
 import { VALIDATION_MESSAGE } from '../../utils/constants';
 
 describe('MeController (e2e)', () => {
-  const env = setupE2ETestEnvironment();
+  const env = setupTestEnvironment();
 
   describe('/user/me (GET)', () => {
     it('should retrieve current user details', async () => {

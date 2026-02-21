@@ -1,0 +1,32 @@
+config:
+  phases:
+    - duration: 10
+      arrivalRate: 5
+      name: 'Warm up'
+    - duration: 10
+      arrivalRate: 50
+      name: 'Spike'
+  processor: './processor.js'
+scenarios:
+  - name: 'Register and Attend Event'
+    flow:
+      - function: 'generateUserData'
+      - post:
+          url: '/auth/register'
+          json:
+            email: '{{ email }}'
+            password: '{{ password }}'
+            firstName: '{{ firstName }}'
+            lastName: '{{ lastName }}'
+          capture:
+            - json: '$.data.accessToken'
+              as: 'token'
+            - json: '$.data.user.id'
+              as: 'userId'
+      - post:
+          url: '/attendance'
+          headers:
+            authorization: 'Bearer {{ token }}'
+          json:
+            eventId: '{{ $processEnvironment.TARGET_EVENT_ID }}'
+            userId: '{{ userId }}'

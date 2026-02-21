@@ -11,8 +11,12 @@ export async function getAuthDetails(app: INestApplication) {
       lastName: 'User',
       email: uniqueEmail,
       password: 'password123',
-    })
-    .expect(201);
+    });
+
+  if (registerResponse.status !== 201) {
+    console.error('Registration failed:', registerResponse.body);
+    throw new Error('Registration failed with status ' + registerResponse.status);
+  }
 
   return {
     token: registerResponse.body.data.accessToken,
