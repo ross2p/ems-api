@@ -13,7 +13,7 @@ import { SuccessResponse } from '../filters/responses';
 
 @Injectable()
 export class ResponseInterceptor implements NestInterceptor {
-  constructor(private reflector: Reflector) {}
+  constructor(private readonly reflector: Reflector) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const ctx = context.switchToHttp();
