@@ -103,14 +103,13 @@ export class EventController {
 
   @Patch(':id')
   @UseGuards(AuthGuard)
-  @UsePipes(new ValidationPipe(updateEventSchema))
   @ApiOperation({ summary: 'Update event by ID' })
   @ApiParam({ name: 'id', description: 'Event ID' })
   @ApiResponse({ status: 200, description: 'Event updated successfully' })
   @ResponseMessage('Event updated successfully')
   async updateEvent(
     @Param('id', new ValidationPipe(uuidSchema)) eventId: string,
-    @Body() updateEventDto: UpdateEventDto,
+    @Body(new ValidationPipe(updateEventSchema)) updateEventDto: UpdateEventDto,
   ) {
     return this.eventService.updateEvent(eventId, updateEventDto);
   }

@@ -67,14 +67,14 @@ export class CategoryController {
 
   @Patch(':id')
   @UseGuards(AuthGuard)
-  @UsePipes(new ValidationPipe(updateCategorySchema))
   @ApiOperation({ summary: 'Update category by ID' })
   @ApiParam({ name: 'id', description: 'Category ID' })
   @ApiResponse({ status: 200, description: 'Category updated successfully' })
   @ResponseMessage('Category updated successfully')
   async updateCategory(
     @Param('id') categoryId: string,
-    @Body() updateCategoryDto: UpdateCategoryDto,
+    @Body(new ValidationPipe(updateCategorySchema))
+    updateCategoryDto: UpdateCategoryDto,
   ) {
     return this.categoryService.updateCategory(categoryId, updateCategoryDto);
   }
