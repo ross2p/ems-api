@@ -1,8 +1,8 @@
 import { setupTestEnvironment } from '../../../utils/test-setup.util';
-import { EventService } from '../../../../src/modules/event/event.service';
-import { CreateEventDto } from '../../../../src/modules/event/dto/create-event.dto';
-import { UpdateEventDto } from '../../../../src/modules/event/dto/update-event.dto';
-import { EventFilterDto } from '../../../../src/modules/event/dto/event-filter.dto';
+import { EventService } from '../../@modules/event/event.service';
+import { CreateEventDto } from '../../@modules/event/dto/create-event.dto';
+import { UpdateEventDto } from '../../@modules/event/dto/update-event.dto';
+import { EventFilterDto } from '../../@modules/event/dto/event-filter.dto';
 import { NotFoundException } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 

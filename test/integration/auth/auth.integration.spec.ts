@@ -1,8 +1,8 @@
-import { setupTestEnvironment } from '../../../utils/test-setup.util';
-import { AuthService } from '../../../../src/modules/auth/auth.service';
-import { CreateUserDto } from '../../../../src/modules/user/dtos/create-user.dto';
-import { LoginDto } from '../../../../src/modules/auth/dtos/login.dto';
+import { AuthService } from '@/modules/auth/auth.service';
+import { LoginDto } from '@/modules/auth/dtos/login.dto';
+import { CreateUserDto } from '@/modules/user/dtos/create-user.dto';
 import { BadRequestException } from '@nestjs/common';
+import { setupTestEnvironment } from '../../utils/test-setup.util';
 
 describe('AuthService (Integration)', () => {
   const env = setupTestEnvironment();

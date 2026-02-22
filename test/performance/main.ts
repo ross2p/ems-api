@@ -1,12 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AppModule } from '../../src/app.module';
-import { TestDatabaseEnvironment } from '../utils/database.util';
 import { spawn } from 'node:child_process';
 import * as path from 'node:path';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 
 import '../main.test';
+import { AppModule } from '../../src/app.module';
+import { TestDatabaseEnvironment } from '../utils/database.util';
 
 async function runArtillery(scenario: string, targetUrl: string) {
   return new Promise((resolve, reject) => {
@@ -125,4 +125,4 @@ async function bootstrap() {
   }
 }
 
-bootstrap();
+void bootstrap();

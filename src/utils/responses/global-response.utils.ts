@@ -1,10 +1,10 @@
 import { HttpStatus } from '@nestjs/common';
 
 export class GlobalResponse<T = any> {
-  statusCode: number;
-  message: string;
-  name: string;
-  data: T;
+  readonly statusCode: number;
+  readonly message: string;
+  readonly name: string;
+  readonly data: T;
 
   constructor(statusCode: number, message: string, data: T, name?: string) {
     this.statusCode = statusCode;

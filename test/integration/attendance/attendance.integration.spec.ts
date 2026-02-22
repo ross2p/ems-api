@@ -1,9 +1,9 @@
-import { setupTestEnvironment } from '../../../utils/test-setup.util';
-import { AttendanceService } from '../../../../src/modules/attendance/attendance.service';
-import { CreateAttendanceDto } from '../../../../src/modules/attendance/dtos/create-attendance.dto';
-import { AttendanceFilterDto } from '../../../../src/modules/attendance/dtos/attendance-filter.dto';
 import { NotFoundException } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
+import { AttendanceService } from '@/modules/attendance/attendance.service';
+import { AttendanceFilterDto } from '@/modules/attendance/dtos/attendance-filter.dto';
+import { CreateAttendanceDto } from '@/modules/attendance/dtos/create-attendance.dto';
+import { setupTestEnvironment } from 'test/utils/test-setup.util';
 
 describe('AttendanceService (Integration)', () => {
   const env = setupTestEnvironment();
@@ -18,7 +18,6 @@ describe('AttendanceService (Integration)', () => {
   });
 
   beforeEach(async () => {
-    // Need user, category, and event to create attendances
     const user = await env.dbEnv.prisma.user.create({
       data: {
         email: `attendee_${Date.now()}@example.com`,

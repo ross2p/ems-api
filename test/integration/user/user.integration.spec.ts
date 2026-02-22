@@ -1,7 +1,7 @@
 import { setupTestEnvironment } from '../../../utils/test-setup.util';
-import { UserService } from '../../../../src/modules/user/user.service';
-import { CreateUserDto } from '../../../../src/modules/user/dtos/create-user.dto';
-import { UpdateUserDto } from '../../../../src/modules/user/dtos/update-user.dto';
+import { UserService } from '../../@modules/user/user.service';
+import { CreateUserDto } from '../../@modules/user/dtos/create-user.dto';
+import { UpdateUserDto } from '../../@modules/user/dtos/update-user.dto';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 
