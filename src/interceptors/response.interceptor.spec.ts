@@ -3,7 +3,7 @@ import { Reflector } from '@nestjs/core';
 import { ExecutionContext, CallHandler } from '@nestjs/common';
 import { of } from 'rxjs';
 import { RESPONSE_MESSAGE_KEY } from '../utils';
-import { SuccessResponse } from '../filters/responses';
+import { SuccessResponse } from '../utils/responses';
 import { createMock } from '@golevelup/ts-jest';
 
 describe('ResponseInterceptor', () => {

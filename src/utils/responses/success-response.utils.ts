@@ -1,4 +1,4 @@
-import { GlobalResponse } from './global-response';
+import { GlobalResponse } from './global-response.utils';
 
 export class SuccessResponse<T = any> extends GlobalResponse<T> {
   constructor(

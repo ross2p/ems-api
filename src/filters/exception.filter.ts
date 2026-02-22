@@ -1,7 +1,7 @@
 import { Catch } from '@nestjs/common';
 import { IExceptionHandler } from './i-exception.filter';
 import { HttpException } from '@nestjs/common/exceptions/http.exception';
-import { ErrorResponse } from './responses';
+import { ErrorResponse } from '../utils/responses';
 @Catch(HttpException)
 export class ExceptionFilter extends IExceptionHandler<HttpException> {
   handle(exception: HttpException): ErrorResponse {

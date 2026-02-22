@@ -1,6 +1,6 @@
 import { Catch } from '@nestjs/common';
 import { IExceptionHandler } from './i-exception.filter';
-import { ErrorResponse } from './responses';
+import { ErrorResponse } from '../utils/responses';
 
 @Catch()
 export class GlobalFilter extends IExceptionHandler {

@@ -1,6 +1,6 @@
 import { ArgumentsHost, ExceptionFilter, Logger } from '@nestjs/common';
 import { Response } from 'express';
-import { ErrorResponse } from './responses';
+import { ErrorResponse } from '../utils/responses';
 
 export abstract class IExceptionHandler<
   T = unknown,
