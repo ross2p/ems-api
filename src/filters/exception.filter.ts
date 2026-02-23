@@ -15,10 +15,10 @@ export class ExceptionFilter extends IExceptionHandler<HttpException> {
     delete data.statusCode;
     delete data.error;
 
-    return new ErrorResponse(
-      message || 'Unexpected error',
-      exception.getStatus(),
-      data || null,
-    );
+    return new ErrorResponse({
+      message: message || 'Unexpected error',
+      statusCode: exception.getStatus(),
+      data: data || null,
+    });
   }
 }

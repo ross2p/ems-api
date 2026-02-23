@@ -72,7 +72,7 @@ export class AuthService {
       accessToken,
     };
   }
-  async validateAccessToken(accessToken: string) {
-    return this.getUserByToken(accessToken, TokenType.ACCESS);
+  async validateAccessToken(token: AccessToken) {
+    return this.getUserByToken(token.accessToken, TokenType.ACCESS);
   }
 }

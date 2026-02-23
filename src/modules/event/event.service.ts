@@ -37,4 +37,12 @@ export class EventService {
     await this.findEventByIdOrThrow(eventId);
     return this.eventRepository.deleteEvent(eventId);
   }
+
+  async findUserAttendedEvents(userId: string) {
+    return this.eventRepository.findUserAttendedEvents(userId);
+  }
+
+  async findEventsByFilter(filter: Partial<EventFilterDto>) {
+    return this.eventRepository.findEventsByFilter(filter);
+  }
 }

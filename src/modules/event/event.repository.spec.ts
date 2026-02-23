@@ -48,7 +48,6 @@ describe('EventRepository', () => {
     }).compile();
 
     repository = module.get<EventRepository>(EventRepository);
-    databaseService = module.get(DatabaseService);
     // Mock the property access
     (repository as any).eventRepository = mockEventRepository;
   });
@@ -169,101 +168,37 @@ describe('EventRepository', () => {
     });
   });
 
-  describe('findEventsByCategory', () => {
-    it('should find events by category', async () => {
+  describe('findEventsByFilter', () => {
+    it('should find events based on various filters', async () => {
       mockEventRepository.findMany.mockResolvedValue([mockEvent]);
-
-      const result = await repository.findEventsByCategory(
-        'cat-id',
-        ['exclude-id'],
-        10,
-      );
-
-      expect(mockEventRepository.findMany).toHaveBeenCalledWith({
-        where: {
-          categoryId: 'cat-id',
-          id: {
-            notIn: ['exclude-id'],
-          },
-        },
-        include: {
-          category: true,
-          createdBy: true,
-        },
+      const filterDto: Partial<EventFilterDto> = {
+        categoryId: 'cat-id',
+        includeEventIds: ['id1', 'id2'],
+        excludeEventIds: ['exclude-id'],
         take: 10,
-        orderBy: {
-          startDate: 'asc',
-        },
-      });
-      expect(result).toEqual([mockEvent]);
-    });
-  });
+        startDate: new Date('2024-01-01'),
+        latitude: 10,
+        longitude: 10,
+        radiusKm: 50,
+      };
 
-  describe('findUpcomingEvents', () => {
-    it('should find upcoming events', async () => {
-      mockEventRepository.findMany.mockResolvedValue([mockEvent]);
-      const startDate = new Date('2024-01-01');
-
-      const result = await repository.findUpcomingEvents(
-        startDate,
-        7,
-        ['exclude-id'],
-        10,
-      );
+      const result = await repository.findEventsByFilter(filterDto);
 
       expect(mockEventRepository.findMany).toHaveBeenCalled();
+
       const callArgs = mockEventRepository.findMany.mock.calls[0][0];
-      expect(callArgs.where.startDate.gte).toEqual(startDate);
-      // Logic inside calculates endDate as startDate + daysRange
-      // We assume date logic is correct, just checking call made
-      expect(result).toEqual([mockEvent]);
-    });
-  });
 
-  describe('findNearbyEvents', () => {
-    it('should find nearby events', async () => {
-      mockEventRepository.findMany.mockResolvedValue([mockEvent]);
-
-      const result = await repository.findNearbyEvents(
-        10,
-        10,
-        50,
-        ['exclude-id'],
-        10,
+      expect(callArgs.where.categoryId).toBe('cat-id');
+      expect(callArgs.where.AND).toEqual(
+        expect.arrayContaining([
+          { startDate: { gte: new Date(filterDto.startDate!) } },
+          { id: { notIn: ['exclude-id'] } },
+          { id: { in: ['id1', 'id2'] } },
+        ]),
       );
-
-      expect(mockEventRepository.findMany).toHaveBeenCalled();
-      const callArgs = mockEventRepository.findMany.mock.calls[0][0];
-      expect(callArgs.where.latitude.gte).toBeLessThan(10);
-      expect(callArgs.where.latitude.lte).toBeGreaterThan(10);
-      expect(result).toEqual([mockEvent]);
-    });
-  });
-
-  describe('findEventsByMultipleIds', () => {
-    it('should find events by multiple ids', async () => {
-      mockEventRepository.findMany.mockResolvedValue([mockEvent]);
-      const ids = ['id1', 'id2'];
-
-      const result = await repository.findEventsByMultipleIds(
-        ids,
-        ['exclude-id'],
-        10,
-      );
-
-      expect(mockEventRepository.findMany).toHaveBeenCalledWith({
-        where: {
-          id: {
-            in: ids,
-            notIn: ['exclude-id'],
-          },
-        },
-        include: {
-          category: true,
-          createdBy: true,
-        },
-        take: 10,
-      });
+      // specific overrides by context
+      expect(callArgs.orderBy).toEqual({ startDate: 'asc' });
+      expect(callArgs.take).toBe(10);
       expect(result).toEqual([mockEvent]);
     });
   });

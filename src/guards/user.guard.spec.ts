@@ -64,7 +64,9 @@ describe('AuthGuard', () => {
     await expect(authGuard.canActivate(mockContext)).rejects.toThrow(
       'Missing token or user not found',
     );
-    expect(authService.validateAccessToken).toHaveBeenCalledWith('valid_token');
+    expect(authService.validateAccessToken).toHaveBeenCalledWith({
+      accessToken: 'valid_token',
+    });
   });
 
   it('should attach user to request and return true if token is valid', async () => {
@@ -93,6 +95,8 @@ describe('AuthGuard', () => {
 
     expect(result).toBe(true);
     expect(mockRequest.user).toEqual(mockUser);
-    expect(authService.validateAccessToken).toHaveBeenCalledWith('valid_token');
+    expect(authService.validateAccessToken).toHaveBeenCalledWith({
+      accessToken: 'valid_token',
+    });
   });
 });

@@ -15,7 +15,9 @@ export async function getAuthDetails(app: INestApplication) {
 
   if (registerResponse.status !== 201) {
     console.error('Registration failed:', registerResponse.body);
-    throw new Error('Registration failed with status ' + registerResponse.status);
+    throw new Error(
+      'Registration failed with status ' + registerResponse.status,
+    );
   }
 
   return {

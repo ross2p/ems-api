@@ -24,6 +24,11 @@ export class ResponseInterceptor implements NestInterceptor {
     const status: number = response.statusCode;
     return next
       .handle()
-      .pipe(map((data: unknown) => new SuccessResponse(data, message, status)));
+      .pipe(
+        map(
+          (data: unknown) =>
+            new SuccessResponse({ data, message, statusCode: status }),
+        ),
+      );
   }
 }

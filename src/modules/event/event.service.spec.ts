@@ -88,6 +88,20 @@ describe('EventService', () => {
     });
   });
 
+  describe('findEventsByFilter', () => {
+    it('should proxy call to repository findEventsByFilter', async () => {
+      eventRepository.findEventsByFilter.mockResolvedValue([mockEvent] as any);
+      const filterDto: Partial<EventFilterDto> = { categoryId: 'cat-id' };
+
+      const result = await service.findEventsByFilter(filterDto);
+
+      expect(result).toEqual([mockEvent]);
+      expect(eventRepository.findEventsByFilter).toHaveBeenCalledWith(
+        filterDto,
+      );
+    });
+  });
+
   describe('findEventByIdOrThrow', () => {
     it('should return event if found', async () => {
       eventRepository.findEventById.mockResolvedValue(mockEvent as any);

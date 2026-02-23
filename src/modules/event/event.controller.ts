@@ -27,27 +27,24 @@ import { ValidationPipe } from '../../pipes/validation.pipe';
 import { createEventSchema } from './schemas/create-event.schema';
 import { updateEventSchema } from './schemas/update-event.schema';
 import { uuidSchema } from '../../schemas/uuid.schema';
-import { EventRecommendationService } from './event-recommendation.service';
-import { PageRequest } from '../../utils/pageables/page-request.utils';
-import { CacheService } from '../cache/cache.service';
+import { EventQueryDto } from './dto/event-query.dto';
+import { eventQuerySchema } from './schemas/event-query.schema';
 
 @ApiTags('Events')
 @ApiBearerAuth()
 @Controller('event')
 export class EventController {
-  constructor(
-    private readonly eventService: EventService,
-    private readonly eventRecommendationService: EventRecommendationService,
-    private readonly cacheService: CacheService,
-  ) {}
+  constructor(private readonly eventService: EventService) {}
 
   @Get()
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Get all events with pagination and filtering' })
   @ApiResponse({ status: 200, description: 'List of events' })
   @ResponseMessage('Events retrieved successfully')
-  async getEvents(@Query() eventFilterDto: EventFilterDto) {
-    return this.eventService.findPageableEvents(eventFilterDto);
+  async getEvents(
+    @Query(new ValidationPipe(eventQuerySchema)) query: EventQueryDto,
+  ) {
+    return this.eventService.findPageableEvents(query as EventFilterDto);
   }
 
   @Post()
@@ -73,33 +70,6 @@ export class EventController {
     @Param('id', new ValidationPipe(uuidSchema)) eventId: string,
   ) {
     return this.eventService.findEventByIdOrThrow(eventId);
-  }
-
-  @Get(':id/similar')
-  @ApiOperation({
-    summary: 'Get similar events with personalized recommendations',
-    description:
-      'Returns personalized event recommendations if user is authenticated. Uses collaborative filtering and content-based filtering.',
-  })
-  @ApiParam({ name: 'id', description: 'Event ID' })
-  @ApiResponse({ status: 200, description: 'Similar events retrieved' })
-  @ResponseMessage('Similar events retrieved successfully')
-  @UseGuards(AuthGuard)
-  async getSimilarEvents(
-    @Param('id', new ValidationPipe(uuidSchema)) eventId: string,
-    @UserDetails() user: UserEntity,
-    @Query() pageRequest?: PageRequest,
-  ) {
-    const userId = user.id;
-    const cacheKey = `similar_events:${eventId}:${userId}:${JSON.stringify(pageRequest)}`;
-
-    return this.cacheService.getOrSet(cacheKey, () =>
-      this.eventRecommendationService.getRecommendedEvents(
-        eventId,
-        userId,
-        pageRequest?.take,
-      ),
-    );
   }
 
   @Patch(':id')

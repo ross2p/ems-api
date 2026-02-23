@@ -1,13 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { EventRecommendationService } from './event-recommendation.service';
-import { EventRepository } from './event.repository';
-import { AttendanceService } from '../attendance/attendance.service';
+import { EventService } from '../event.service';
+import { AttendanceService } from '../../attendance/attendance.service';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { NotFoundException } from '@nestjs/common';
+import { CategorySimilarityStrategy } from './strategies/category-similarity.strategy';
+import { LocationSimilarityStrategy } from './strategies/location-similarity.strategy';
+import { TimeSimilarityStrategy } from './strategies/time-similarity.strategy';
 
 describe('EventRecommendationService', () => {
   let service: EventRecommendationService;
-  let eventRepository: DeepMocked<EventRepository>;
+  let eventService: DeepMocked<EventService>;
   let attendanceService: DeepMocked<AttendanceService>;
 
   const mockDate = new Date();
@@ -39,9 +42,12 @@ describe('EventRecommendationService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         EventRecommendationService,
+        CategorySimilarityStrategy,
+        LocationSimilarityStrategy,
+        TimeSimilarityStrategy,
         {
-          provide: EventRepository,
-          useValue: createMock<EventRepository>(),
+          provide: EventService,
+          useValue: createMock<EventService>(),
         },
         {
           provide: AttendanceService,
@@ -53,7 +59,7 @@ describe('EventRecommendationService', () => {
     service = module.get<EventRecommendationService>(
       EventRecommendationService,
     );
-    eventRepository = module.get(EventRepository);
+    eventService = module.get(EventService);
     attendanceService = module.get(AttendanceService);
   });
 
@@ -63,7 +69,9 @@ describe('EventRecommendationService', () => {
 
   describe('getRecommendedEvents', () => {
     it('should throw NotFoundException if event not found', async () => {
-      eventRepository.findEventById.mockResolvedValue(null);
+      eventService.findEventByIdOrThrow.mockRejectedValue(
+        new NotFoundException(),
+      );
 
       await expect(service.getRecommendedEvents('invalid-id')).rejects.toThrow(
         NotFoundException,
@@ -71,11 +79,9 @@ describe('EventRecommendationService', () => {
     });
 
     it('should return empty array if no candidates found', async () => {
-      eventRepository.findEventById.mockResolvedValue(targetEvent);
+      eventService.findEventByIdOrThrow.mockResolvedValue(targetEvent);
       // Mock all candidate sources to return empty
-      eventRepository.findEventsByCategory.mockResolvedValue([]);
-      eventRepository.findUpcomingEvents.mockResolvedValue([]);
-      eventRepository.findNearbyEvents.mockResolvedValue([]);
+      eventService.findEventsByFilter.mockResolvedValue([]);
       // Mock collaborative part (if userId provided, but here undefined)
 
       const result = await service.getRecommendedEvents(targetEvent.id);
@@ -97,12 +103,13 @@ describe('EventRecommendationService', () => {
         startDate: new Date('2025-01-01T12:00:00Z'), // Different time
       }); // Should have low score
 
-      eventRepository.findEventById.mockResolvedValue(targetEvent);
+      eventService.findEventByIdOrThrow.mockResolvedValue(targetEvent);
 
       // Mock candidates
-      eventRepository.findEventsByCategory.mockResolvedValue([candidate1]);
-      eventRepository.findUpcomingEvents.mockResolvedValue([candidate2]);
-      eventRepository.findNearbyEvents.mockResolvedValue([]);
+      eventService.findEventsByFilter
+        .mockResolvedValueOnce([candidate1]) // category match
+        .mockResolvedValueOnce([candidate2]) // upcoming match
+        .mockResolvedValueOnce([]); // nearby matches
 
       const result = await service.getRecommendedEvents(targetEvent.id);
 
@@ -115,17 +122,14 @@ describe('EventRecommendationService', () => {
       const userId = 'user-1';
       const candidate1 = createMockEvent('c1');
 
-      eventRepository.findEventById.mockResolvedValue(targetEvent);
+      eventService.findEventByIdOrThrow.mockResolvedValue(targetEvent);
 
       // Basic candidates
-      eventRepository.findEventsByCategory.mockResolvedValue([candidate1]);
-      eventRepository.findUpcomingEvents.mockResolvedValue([]);
-      eventRepository.findNearbyEvents.mockResolvedValue([]);
-
-      // Mock user attended events
-      eventRepository.findUserAttendedEvents.mockResolvedValue([
-        createMockEvent('past-event'),
-      ]);
+      eventService.findEventsByFilter
+        .mockResolvedValueOnce([candidate1])
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([]); // collaborative
 
       // Mock collaborative logic
       // 1. findSimilarUsers via attendance service
@@ -135,50 +139,14 @@ describe('EventRecommendationService', () => {
         { userId: 'sim-user', eventId: 'c1' } as any,
       ]);
 
-      // Inside findSimilarUsers:
-      // user-1 has {past-event}
-      // sim-user has {past-event, c1}
-      // intersection {past-event}, union {past-event, c1} -> sim = 0.5
-
-      // 2. getCollaborativeCandidates calls findUserAttendedEvents for similar users
-      // This is called inside generateCandidates -> getCollaborativeCandidates
-      // But also inside addCollaborativeScores
-
-      // Check if candidate1 gets boosted
-      // We need to ensure candidate1 is returned by getCollaborativeCandidates potentially
-      // or at least available in candidates list. It is already in category candidates.
-
-      // Mock findUserAttendedEvents for sim-user
-      eventRepository.findUserAttendedEvents.mockResolvedValueOnce([
-        createMockEvent('past-event'),
-      ]); // For initial user check in generateCandidates
-
-      // wait, logic is:
-      // generateCandidates calls getCollaborativeCandidates which calls findUserAttendedEvents(userId)
-      // then findSimilarUsers
-      // then findUserAttendedEvents(simUser)
-      // then findEventsByMultipleIds
-
-      // Let's simplify and assume candidate1 comes from category, verification is on addCollaborativeScores
-
-      // Re-mock to be safer sequence
-      eventRepository.findUserAttendedEvents
-        .mockResolvedValueOnce([createMockEvent('past-event')]) // user
-        .mockResolvedValueOnce([createMockEvent('past-event'), candidate1]); // sim-user
-
-      // For addCollaborativeScores
-      eventRepository.findUserAttendedEvents
-        .mockResolvedValueOnce([createMockEvent('past-event')]) // user again
-        .mockResolvedValueOnce([createMockEvent('past-event'), candidate1]); // sim-user again
-
-      // Mock similar users manually if needed? No, logic depends on attendanceService.
+      eventService.findUserAttendedEvents
+        .mockResolvedValueOnce([createMockEvent('past-event')]) // For user
+        .mockResolvedValueOnce([createMockEvent('past-event'), candidate1]); // For sim-user
 
       const result = await service.getRecommendedEvents(targetEvent.id, userId);
 
       expect(result).toHaveLength(1);
       expect(result[0].id).toBe('c1');
-      // We can't easily check the internal score directly without inspecting private state or logs,
-      // but if it runs without error and returns the event, logic paths are exercised.
     });
 
     it('should handle pagination limit', async () => {
@@ -186,10 +154,10 @@ describe('EventRecommendationService', () => {
         createMockEvent(`c${i}`, { categoryId: 'cat-target' }),
       );
 
-      eventRepository.findEventById.mockResolvedValue(targetEvent);
-      eventRepository.findEventsByCategory.mockResolvedValue(candidates);
-      eventRepository.findUpcomingEvents.mockResolvedValue([]);
-      eventRepository.findNearbyEvents.mockResolvedValue([]);
+      eventService.findEventByIdOrThrow.mockResolvedValue(targetEvent);
+      eventService.findEventsByFilter
+        .mockResolvedValueOnce(candidates)
+        .mockResolvedValue([]);
 
       const limit = 5;
       const result = await service.getRecommendedEvents(

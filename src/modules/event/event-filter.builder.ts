@@ -115,6 +115,18 @@ export class EventFilterBuilder {
     return this;
   }
 
+  addIncludeEventIds(includeEventIds?: string[]): this {
+    if (includeEventIds && includeEventIds.length > 0) {
+      this.whereClause.AND = this.whereClause.AND || [];
+      (this.whereClause.AND as Prisma.EventWhereInput[]).push({
+        id: {
+          in: includeEventIds,
+        },
+      });
+    }
+    return this;
+  }
+
   buildWhereClause(): Prisma.EventWhereInput {
     return this.whereClause;
   }

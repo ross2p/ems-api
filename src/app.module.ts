@@ -14,6 +14,7 @@ import { TokenModule } from './modules/token/token.module';
 import { DatabaseModule } from './modules/database/database.module';
 import { AttendanceModule } from './modules/attendance/attendance.module';
 import { CacheModule } from './modules/cache/cache.module';
+import { EventRecommendationModule } from './modules/event/recommendation/event-recommendation.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { CacheModule } from './modules/cache/cache.module';
     // <----MODULES---->
     UserModule,
     EventModule,
+    EventRecommendationModule,
     CategoryModule,
     AuthModule,
     TokenModule,

@@ -92,109 +92,32 @@ export class EventRepository {
     });
   }
 
-  async findEventsByCategory(
-    categoryId: string,
-    excludeIds: string[],
-    limit: number,
-  ) {
+  async findEventsByFilter(filter: Partial<EventFilterDto>) {
+    const builder = new EventFilterBuilder()
+      .addSearch(filter.search)
+      .addCategoryFilter(filter.categoryId)
+      .addDateRangeFilter(filter.startDate, filter.endDate)
+      .addSorting(filter.sortBy, filter.sortOrder)
+      .addExcludeEventIds(filter.excludeEventIds)
+      .addIncludeEventIds(filter.includeEventIds)
+      .addRadiusFilter(filter.latitude, filter.longitude, filter.radiusKm);
+
+    const { where } = builder.build();
+    let { orderBy } = builder.build();
+
+    // Specific sorting overrides based on context since the DTO defaults to createdAt
+    if (filter.startDate) {
+      orderBy = { startDate: 'asc' };
+    }
+
     return this.eventRepository.findMany({
-      where: {
-        categoryId,
-        id: {
-          notIn: excludeIds,
-        },
-      },
+      where,
+      orderBy,
+      take: filter.take,
       include: {
         category: true,
         createdBy: true,
       },
-      take: limit,
-      orderBy: {
-        startDate: 'asc',
-      },
-    });
-  }
-
-  async findUpcomingEvents(
-    startDate: Date,
-    daysRange: number,
-    excludeIds: string[],
-    limit: number,
-  ) {
-    const endDate = new Date(startDate);
-    endDate.setDate(endDate.getDate() + daysRange);
-
-    return this.eventRepository.findMany({
-      where: {
-        startDate: {
-          gte: startDate,
-          lte: endDate,
-        },
-        id: {
-          notIn: excludeIds,
-        },
-      },
-      include: {
-        category: true,
-        createdBy: true,
-      },
-      take: limit,
-      orderBy: {
-        startDate: 'asc',
-      },
-    });
-  }
-
-  async findNearbyEvents(
-    latitude: number,
-    longitude: number,
-    maxDistanceKm: number,
-    excludeIds: string[],
-    limit: number,
-  ) {
-    const latDelta = maxDistanceKm / 111;
-    const lonDelta =
-      maxDistanceKm / (111 * Math.cos((latitude * Math.PI) / 180));
-
-    return this.eventRepository.findMany({
-      where: {
-        latitude: {
-          gte: latitude - latDelta,
-          lte: latitude + latDelta,
-        },
-        longitude: {
-          gte: longitude - lonDelta,
-          lte: longitude + lonDelta,
-        },
-        id: {
-          notIn: excludeIds,
-        },
-      },
-      include: {
-        category: true,
-        createdBy: true,
-      },
-      take: limit,
-    });
-  }
-
-  async findEventsByMultipleIds(
-    eventIds: string[],
-    excludeIds: string[],
-    limit: number,
-  ) {
-    return this.eventRepository.findMany({
-      where: {
-        id: {
-          in: eventIds,
-          notIn: excludeIds,
-        },
-      },
-      include: {
-        category: true,
-        createdBy: true,
-      },
-      take: limit,
     });
   }
 }

@@ -5,9 +5,9 @@ import { ErrorResponse } from '../utils/responses/error-response.utils';
 @Catch(Error)
 export class ErrorFilter extends IExceptionHandler {
   handle(exception: Error): ErrorResponse {
-    return new ErrorResponse(
-      exception.message,
-      HttpStatus.INTERNAL_SERVER_ERROR,
-    );
+    return new ErrorResponse({
+      message: exception.message,
+      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+    });
   }
 }

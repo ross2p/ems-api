@@ -5,7 +5,7 @@ import { ErrorResponse } from '../utils/responses';
 
 class ConcreteFilter extends IExceptionHandler {
   handle(_exception: unknown): ErrorResponse {
-    return new ErrorResponse('test error', 500);
+    return new ErrorResponse({ message: 'test error', statusCode: 500 });
   }
 }
 

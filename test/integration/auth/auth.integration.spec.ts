@@ -3,6 +3,7 @@ import { LoginDto } from '@/modules/auth/dtos/login.dto';
 import { CreateUserDto } from '@/modules/user/dtos/create-user.dto';
 import { BadRequestException } from '@nestjs/common';
 import { setupTestEnvironment } from '../../utils/test-setup.util';
+import { AccessToken } from '@/modules/token/dtos/accessToken.dto';
 
 describe('AuthService (Integration)', () => {
   const env = setupTestEnvironment();

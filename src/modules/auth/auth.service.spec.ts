@@ -9,6 +9,7 @@ import { UserEntity } from '../user/user.entity';
 import { LoginDto } from './dtos/login.dto';
 import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { RefreshToken } from '../token/dtos/refresh.token.dto';
+import { AccessToken } from '../token/dtos/accessToken.dto';
 
 jest.mock('bcrypt');
 
@@ -118,7 +119,9 @@ describe('AuthService', () => {
         password: 'password',
       };
 
-      userService.findUserByEmailWithPassword.mockRejectedValue(new Error());
+      userService.findUserByEmailWithPassword.mockRejectedValue(
+        new Error('User not found'),
+      );
 
       await expect(service.login(dto)).rejects.toThrow(BadRequestException);
     });
@@ -150,7 +153,8 @@ describe('AuthService', () => {
 
   describe('validateAccessToken', () => {
     it('should return user for valid token', async () => {
-      const token = 'access-token';
+      const token: AccessToken = new AccessToken();
+      token.accessToken = 'access-token';
       const payload = { userId: mockUser.id, email: mockUser.email };
 
       tokenService.verifyTokenByType.mockReturnValue(payload);

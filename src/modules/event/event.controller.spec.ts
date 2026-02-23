@@ -1,21 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { EventController } from './event.controller';
 import { EventService } from './event.service';
-import { EventRecommendationService } from './event-recommendation.service';
-import { CacheService } from '../cache/cache.service';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
-import { EventFilterDto } from './dto/event-filter.dto';
+import { EventQueryDto } from './dto/event-query.dto';
 import { UserEntity } from '../user/user.entity';
-
-import { PageRequest } from '../../utils/pageables/page-request.utils';
 import { AuthGuard } from '../../guards/user.guard';
+import { CacheService } from '../cache/cache.service';
 
 describe('EventController', () => {
   let controller: EventController;
   let eventService: DeepMocked<EventService>;
-  let recommendationService: DeepMocked<EventRecommendationService>;
   let cacheService: DeepMocked<CacheService>;
 
   const mockUser: UserEntity = {
@@ -62,10 +58,6 @@ describe('EventController', () => {
           useValue: createMock<EventService>(),
         },
         {
-          provide: EventRecommendationService,
-          useValue: createMock<EventRecommendationService>(),
-        },
-        {
           provide: CacheService,
           useValue: createMock<CacheService>(),
         },
@@ -77,7 +69,6 @@ describe('EventController', () => {
 
     controller = module.get<EventController>(EventController);
     eventService = module.get(EventService);
-    recommendationService = module.get(EventRecommendationService);
     cacheService = module.get(CacheService);
   });
 
@@ -87,7 +78,9 @@ describe('EventController', () => {
 
   describe('getEvents', () => {
     it('should return a list of events', async () => {
-      const filterDto = new EventFilterDto();
+      const queryDto = new EventQueryDto();
+      queryDto.pageNumber = 1;
+      queryDto.pageSize = 10;
       const mockResult = {
         data: [mockEvent],
         meta: {
@@ -102,10 +95,13 @@ describe('EventController', () => {
 
       eventService.findPageableEvents.mockResolvedValue(mockResult as any);
 
-      const result = await controller.getEvents(filterDto);
+      const result = await controller.getEvents(queryDto);
 
       expect(result).toEqual(mockResult);
-      expect(eventService.findPageableEvents).toHaveBeenCalledWith(filterDto);
+      expect(eventService.findPageableEvents).toHaveBeenCalled();
+      const calledFilterDto = eventService.findPageableEvents.mock.calls[0][0];
+      expect(calledFilterDto.pageNumber).toBe(1);
+      expect(calledFilterDto.pageSize).toBe(10);
     });
   });
 
@@ -139,36 +135,6 @@ describe('EventController', () => {
       expect(result).toEqual(mockEvent);
       expect(eventService.findEventByIdOrThrow).toHaveBeenCalledWith(
         mockEvent.id,
-      );
-    });
-  });
-
-  describe('getSimilarEvents', () => {
-    it('should return similar events', async () => {
-      const pageRequest = new PageRequest();
-      pageRequest.pageNumber = 1;
-      pageRequest.pageSize = 5;
-      const mockRecommendations = [mockEvent];
-
-      cacheService.getOrSet.mockImplementation(async (key, fn) => {
-        return fn();
-      });
-      recommendationService.getRecommendedEvents.mockResolvedValue(
-        mockRecommendations,
-      );
-
-      const result = await controller.getSimilarEvents(
-        mockEvent.id,
-        mockUser,
-        pageRequest,
-      );
-
-      expect(result).toEqual(mockRecommendations);
-      expect(cacheService.getOrSet).toHaveBeenCalled();
-      expect(recommendationService.getRecommendedEvents).toHaveBeenCalledWith(
-        mockEvent.id,
-        mockUser.id,
-        pageRequest.take,
       );
     });
   });
