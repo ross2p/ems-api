@@ -39,7 +39,7 @@ export class EventRecommendationController {
   @ResponseMessage('Similar events retrieved successfully')
   @UseGuards(AuthGuard)
   async getRecommendations(
-    @Query('eventId', new ValidationPipe(uuidSchema)) eventId: string,
+    @Query('eventId') eventId: string,
     @UserDetails() user: UserEntity,
   ) {
     const userId = user.id;

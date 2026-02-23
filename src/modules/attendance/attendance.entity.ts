@@ -1,4 +1,4 @@
-import { Attendance } from 'generated/prisma';
+import { Attendance } from '../../../generated/prisma';
 
 export class AttendanceEntity implements Attendance {
   id: string;

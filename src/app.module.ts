@@ -26,9 +26,9 @@ import { EventRecommendationModule } from './modules/event/recommendation/event-
     CacheModule,
 
     // <----MODULES---->
+    EventRecommendationModule,
     UserModule,
     EventModule,
-    EventRecommendationModule,
     CategoryModule,
     AuthModule,
     TokenModule,

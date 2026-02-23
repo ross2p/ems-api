@@ -66,9 +66,7 @@ export class EventController {
   @ApiParam({ name: 'id', description: 'Event ID' })
   @ApiResponse({ status: 200, description: 'Event found' })
   @ResponseMessage('Event found successfully')
-  async getEventById(
-    @Param('id', new ValidationPipe(uuidSchema)) eventId: string,
-  ) {
+  async getEventById(@Param('id') eventId: string) {
     return this.eventService.findEventByIdOrThrow(eventId);
   }
 

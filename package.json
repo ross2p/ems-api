@@ -19,6 +19,7 @@
     "db:migrate:reset": "prisma migrate reset --force",
     "db:studio": "prisma studio",
     "prisma:db:push": "prisma db push --preview-feature",
+    "db:seed": "prisma db seed",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
@@ -106,5 +107,8 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
   }
 }

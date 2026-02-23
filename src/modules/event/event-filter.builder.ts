@@ -1,4 +1,4 @@
-import { Prisma } from 'generated/prisma';
+import { Prisma } from '../../../generated/prisma';
 
 export class EventFilterBuilder {
   private readonly whereClause: Prisma.EventWhereInput = {};
