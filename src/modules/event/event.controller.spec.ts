@@ -69,7 +69,6 @@ describe('EventController', () => {
 
     controller = module.get<EventController>(EventController);
     eventService = module.get(EventService);
-    cacheService = module.get(CacheService);
   });
 
   it('should be defined', () => {
