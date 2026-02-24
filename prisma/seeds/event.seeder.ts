@@ -86,7 +86,7 @@ export class EventSeeder extends Seeder {
       const description = `Join us for an engaging and comprehensive ${type.toLowerCase()} focused on the latest trends in ${sub}. Learn from industry experts, network with peers, and improve your skills at this ${adj.toLowerCase()} event in ${loc}.`;
 
       const startDate = new Date();
-      startDate.setDate(startDate.getDate() + Math.floor(Math.random() * 60)); // Events in the next 60 days
+      startDate.setDate(startDate.getDate() + Math.floor(Math.random() * 180)); // Events in the next 180 days
 
       const endDate = new Date(startDate);
       endDate.setHours(endDate.getHours() + Math.floor(Math.random() * 6) + 2); // Duration 2-8 hours

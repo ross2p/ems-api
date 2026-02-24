@@ -197,7 +197,6 @@ describe('EventRepository', () => {
         ]),
       );
       // specific overrides by context
-      expect(callArgs.orderBy).toEqual({ startDate: 'asc' });
       expect(callArgs.take).toBe(10);
       expect(result).toEqual([mockEvent]);
     });

@@ -47,7 +47,7 @@ describe('EventFilterBuilder', () => {
     });
 
     it('should not add category filter if undefined', () => {
-      const result = builder.addCategoryFilter(undefined).buildWhereClause();
+      const result = builder.addCategoryFilter().buildWhereClause();
       expect(result.categoryId).toBeUndefined();
     });
   });
@@ -83,12 +83,12 @@ describe('EventFilterBuilder', () => {
   describe('addSorting', () => {
     it('should add sorting', () => {
       const result = builder.addSorting('title', 'asc').buildOrderByClause();
-      expect(result).toHaveProperty('title', 'asc');
+      expect(result).toEqual([{ createdAt: 'desc' }, { title: 'asc' }]);
     });
 
     it('should default to createdAt desc if not specified', () => {
       const result = builder.buildOrderByClause();
-      expect(result).toEqual({ createdAt: 'desc' });
+      expect(result).toEqual([{ createdAt: 'desc' }]);
     });
   });
 

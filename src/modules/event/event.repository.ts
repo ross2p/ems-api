@@ -55,6 +55,7 @@ export class EventRepository {
         eventFilterDto.longitude,
         eventFilterDto.radiusKm,
       )
+      .addIncludeEventIds(eventFilterDto.includeEventIds)
       .build();
   }
 
@@ -105,9 +106,8 @@ export class EventRepository {
     const { where } = builder.build();
     let { orderBy } = builder.build();
 
-    // Specific sorting overrides based on context since the DTO defaults to createdAt
     if (filter.startDate) {
-      orderBy = { startDate: 'asc' };
+      orderBy.push({ startDate: 'asc' });
     }
 
     return this.eventRepository.findMany({

@@ -11,7 +11,7 @@ export class PageResponse<T> {
     this.pageNumber = pageRequest.pageNumber;
     this.pageSize = Math.min(content.length, pageRequest.pageSize);
     this.pageCount = Math.ceil(
-      totalCount / (this.pageSize === 0 ? pageRequest.pageSize : this.pageSize),
+      totalCount / Math.max(content.length, pageRequest.pageSize),
     );
     this.content = content;
     this.totalCount = totalCount;

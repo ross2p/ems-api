@@ -2,9 +2,11 @@ import { Prisma } from '../../../generated/prisma';
 
 export class EventFilterBuilder {
   private readonly whereClause: Prisma.EventWhereInput = {};
-  private orderByClause: Prisma.EventOrderByWithRelationInput = {
-    createdAt: 'desc',
-  };
+  private readonly orderByClause: Prisma.EventOrderByWithRelationInput[] = [
+    {
+      createdAt: 'desc',
+    },
+  ];
 
   addRadiusFilter(
     latitude?: number,
@@ -98,7 +100,7 @@ export class EventFilterBuilder {
     sortOrder: 'asc' | 'desc' = 'asc',
   ): this {
     if (sortBy) {
-      this.orderByClause = { ...this.orderByClause, [sortBy]: sortOrder };
+      this.orderByClause.push({ [sortBy]: sortOrder });
     }
     return this;
   }
@@ -131,13 +133,13 @@ export class EventFilterBuilder {
     return this.whereClause;
   }
 
-  buildOrderByClause(): Prisma.EventOrderByWithRelationInput {
+  buildOrderByClause(): Prisma.EventOrderByWithRelationInput[] {
     return this.orderByClause;
   }
 
   build(): {
     where: Prisma.EventWhereInput;
-    orderBy: Prisma.EventOrderByWithRelationInput;
+    orderBy: Prisma.EventOrderByWithRelationInput[];
   } {
     return {
       where: this.whereClause,

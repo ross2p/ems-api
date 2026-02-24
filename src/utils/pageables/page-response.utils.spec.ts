@@ -19,7 +19,7 @@ describe('PageResponse', () => {
     expect(response.totalCount).toBe(13);
     expect(response.pageNumber).toBe(1);
     expect(response.pageSize).toBe(3); // Math.min(3, 10)
-    expect(response.pageCount).toBe(5); // Math.ceil(13 / 3)
+    expect(response.pageCount).toBe(2); // Math.ceil(13 / 3)
     expect(response.content).toEqual(content);
   });
 
