@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { AttendanceService } from '@/modules/attendance/attendance.service';
 import { AttendanceFilterDto } from '@/modules/attendance/dtos/attendance-filter.dto';
 import { CreateAttendanceDto } from '@/modules/attendance/dtos/create-attendance.dto';
-import { setupTestEnvironment } from 'test/utils/test-setup.util';
+import { setupTestEnvironment } from '../../utils/test-setup.util';
 
 describe('AttendanceService (Integration)', () => {
   const env = setupTestEnvironment();
