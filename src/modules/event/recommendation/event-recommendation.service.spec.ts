@@ -7,6 +7,8 @@ import { NotFoundException } from '@nestjs/common';
 import { CategorySimilarityStrategy } from './strategies/category-similarity.strategy';
 import { LocationSimilarityStrategy } from './strategies/location-similarity.strategy';
 import { TimeSimilarityStrategy } from './strategies/time-similarity.strategy';
+import { EventEntity } from '../event.entity';
+import { AttendanceEntity } from '../../attendance/attendance.entity';
 
 describe('EventRecommendationService', () => {
   let service: EventRecommendationService;
@@ -15,8 +17,10 @@ describe('EventRecommendationService', () => {
 
   const mockDate = new Date();
 
-  // Helper to create mocked events with varying properties
-  const createMockEvent = (id: string, overrides?: Partial<any>): any => ({
+  const createMockEvent = (
+    id: string,
+    overrides?: Partial<EventEntity>,
+  ): EventEntity => ({
     id,
     title: `Event ${id}`,
     description: 'Desc',
@@ -25,6 +29,7 @@ describe('EventRecommendationService', () => {
     endDate: mockDate,
     latitude: 10,
     longitude: 10,
+    location: 'Test Location',
     createdById: 'creator-id',
     createdAt: mockDate,
     updatedAt: mockDate,
@@ -133,11 +138,32 @@ describe('EventRecommendationService', () => {
 
       // Mock collaborative logic
       // 1. findSimilarUsers via attendance service
-      attendanceService.findUsersWhoAttendedEvents.mockResolvedValue([
-        { userId: userId, eventId: 'past-event' } as any,
-        { userId: 'sim-user', eventId: 'past-event' } as any,
-        { userId: 'sim-user', eventId: 'c1' } as any,
-      ]);
+      const mockAttendances: AttendanceEntity[] = [
+        {
+          id: 'a1',
+          userId: userId,
+          eventId: 'past-event',
+          createdAt: mockDate,
+          updatedAt: mockDate,
+        },
+        {
+          id: 'a2',
+          userId: 'sim-user',
+          eventId: 'past-event',
+          createdAt: mockDate,
+          updatedAt: mockDate,
+        },
+        {
+          id: 'a3',
+          userId: 'sim-user',
+          eventId: 'c1',
+          createdAt: mockDate,
+          updatedAt: mockDate,
+        },
+      ];
+      attendanceService.findUsersWhoAttendedEvents.mockResolvedValue(
+        mockAttendances,
+      );
 
       eventService.findUserAttendedEvents
         .mockResolvedValueOnce([createMockEvent('past-event')]) // For user

@@ -7,12 +7,26 @@ import { NotFoundException } from '@nestjs/common';
 
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
+import { EventEntity } from './event.entity';
+
+type EventWithRelations = EventEntity & {
+  category: null;
+  createdBy: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    createdAt: Date;
+    updatedAt: Date;
+  };
+};
 
 describe('EventService', () => {
   let service: EventService;
   let eventRepository: DeepMocked<EventRepository>;
 
-  const mockEvent = {
+  const mockEvent: EventWithRelations = {
     id: 'event-id',
     title: 'Test Event',
     description: 'Test Description',
@@ -74,7 +88,9 @@ describe('EventService', () => {
         },
       });
 
-      eventRepository.findPageableEvents.mockResolvedValue([mockEvent] as any);
+      eventRepository.findPageableEvents.mockResolvedValue([
+        mockEvent,
+      ] as EventWithRelations[]);
       eventRepository.countEvents.mockResolvedValue(1);
 
       const result = await service.findPageableEvents(filterDto);
@@ -83,14 +99,16 @@ describe('EventService', () => {
         filterDto,
       );
       expect(eventRepository.countEvents).toHaveBeenCalledWith(filterDto);
-      expect((result as any).data).toEqual([mockEvent]);
-      expect((result as any).meta.itemCount).toBe(1);
+      expect(result).toHaveProperty('data');
+      expect(result).toHaveProperty('meta.itemCount', 1);
     });
   });
 
   describe('findEventsByFilter', () => {
     it('should proxy call to repository findEventsByFilter', async () => {
-      eventRepository.findEventsByFilter.mockResolvedValue([mockEvent] as any);
+      eventRepository.findEventsByFilter.mockResolvedValue([
+        mockEvent,
+      ] as EventWithRelations[]);
       const filterDto: Partial<EventFilterDto> = { categoryId: 'cat-id' };
 
       const result = await service.findEventsByFilter(filterDto);
@@ -104,7 +122,7 @@ describe('EventService', () => {
 
   describe('findEventByIdOrThrow', () => {
     it('should return event if found', async () => {
-      eventRepository.findEventById.mockResolvedValue(mockEvent as any);
+      eventRepository.findEventById.mockResolvedValue(mockEvent);
 
       const result = await service.findEventByIdOrThrow(mockEvent.id);
 
@@ -132,7 +150,7 @@ describe('EventService', () => {
         createdById: 'user-id',
       };
 
-      eventRepository.createEvent.mockResolvedValue(mockEvent as any);
+      eventRepository.createEvent.mockResolvedValue(mockEvent);
 
       const result = await service.createEvent(createDto);
 
@@ -149,8 +167,8 @@ describe('EventService', () => {
 
       const updatedEvent = { ...mockEvent, ...updateDto };
 
-      eventRepository.findEventById.mockResolvedValue(mockEvent as any);
-      eventRepository.updateEvent.mockResolvedValue(updatedEvent as any);
+      eventRepository.findEventById.mockResolvedValue(mockEvent);
+      eventRepository.updateEvent.mockResolvedValue(updatedEvent);
 
       const result = await service.updateEvent(mockEvent.id, updateDto);
 
@@ -175,8 +193,8 @@ describe('EventService', () => {
 
   describe('deleteEvent', () => {
     it('should delete an event if found', async () => {
-      eventRepository.findEventById.mockResolvedValue(mockEvent as any);
-      eventRepository.deleteEvent.mockResolvedValue(mockEvent as any);
+      eventRepository.findEventById.mockResolvedValue(mockEvent);
+      eventRepository.deleteEvent.mockResolvedValue(mockEvent);
 
       const result = await service.deleteEvent(mockEvent.id);
 

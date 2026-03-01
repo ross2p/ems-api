@@ -1,4 +1,5 @@
 import { EventFilterBuilder } from './event-filter.builder';
+import { Prisma } from '@generated/prisma';
 
 describe('EventFilterBuilder', () => {
   let builder: EventFilterBuilder;
@@ -57,7 +58,8 @@ describe('EventFilterBuilder', () => {
       const startDate = new Date('2024-01-01');
       const result = builder.addDateRangeFilter(startDate).buildWhereClause();
 
-      expect((result.AND as any)[0].startDate.gte).toEqual(startDate);
+      const andClauses = result.AND as Prisma.EventWhereInput[];
+      expect(andClauses[0]).toMatchObject({ startDate: { gte: startDate } });
     });
 
     it('should add end date filter', () => {
@@ -66,7 +68,8 @@ describe('EventFilterBuilder', () => {
         .addDateRangeFilter(undefined, endDate)
         .buildWhereClause();
 
-      expect((result.AND as any)[0].endDate.lte).toEqual(endDate);
+      const andClauses = result.AND as Prisma.EventWhereInput[];
+      expect(andClauses[0]).toMatchObject({ endDate: { lte: endDate } });
     });
 
     it('should add both start and end date filters', () => {
@@ -97,7 +100,8 @@ describe('EventFilterBuilder', () => {
       const ids = ['id1', 'id2'];
       const result = builder.addExcludeEventIds(ids).buildWhereClause();
 
-      expect((result.AND as any)[0].id.notIn).toEqual(ids);
+      const andClauses = result.AND as Prisma.EventWhereInput[];
+      expect(andClauses[0]).toMatchObject({ id: { notIn: ids } });
     });
 
     it('should not add exclusion if array is empty', () => {

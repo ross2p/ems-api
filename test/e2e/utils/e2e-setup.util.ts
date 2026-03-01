@@ -9,8 +9,11 @@ export interface E2ETestEnvironment {
 }
 
 export function setupE2ETestEnvironment(): E2ETestEnvironment {
-  const env: E2ETestEnvironment = {
-    app: null as any,
+  const env: {
+    app: INestApplication | null;
+    dbEnv: TestDatabaseEnvironment;
+  } = {
+    app: null,
     dbEnv: new TestDatabaseEnvironment(),
   };
 
@@ -36,5 +39,5 @@ export function setupE2ETestEnvironment(): E2ETestEnvironment {
     await env.dbEnv.reset();
   });
 
-  return env;
+  return env as E2ETestEnvironment;
 }

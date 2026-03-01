@@ -110,7 +110,7 @@ async function bootstrap() {
       // Provide Target Event ID for Artillery variables
       process.env.TARGET_EVENT_ID = event.id;
 
-      const port = configService.getOrThrow('PORT');
+      const port = configService.getOrThrow<string>('PORT');
       const targetUrl = process.env.BASE_URL || `http://localhost:${port}`;
 
       await runArtillery(scenario, targetUrl);

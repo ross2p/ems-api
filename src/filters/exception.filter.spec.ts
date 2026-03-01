@@ -81,7 +81,7 @@ describe('ExceptionFilter', () => {
 
     it('should use "Unexpected error" when message is missing from object response', () => {
       const exception = new HttpException(
-        { statusCode: 500 } as any,
+        { statusCode: 500 } as Record<string, number>,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
 

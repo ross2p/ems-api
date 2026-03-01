@@ -11,9 +11,9 @@ import { promisify } from 'node:util';
 const execAsync = promisify(exec);
 
 export class TestDatabaseEnvironment {
-  private container: StartedPostgreSqlContainer;
-  public prisma: PrismaClient;
-  private pool: Pool;
+  private container!: StartedPostgreSqlContainer;
+  public prisma!: PrismaClient;
+  private pool!: Pool;
 
   async start() {
     this.container = await new PostgreSqlContainer(

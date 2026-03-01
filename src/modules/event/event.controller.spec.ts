@@ -8,11 +8,25 @@ import { EventQueryDto } from './dto/event-query.dto';
 import { UserEntity } from '../user/user.entity';
 import { AuthGuard } from '../../guards/user.guard';
 import { CacheService } from '../cache/cache.service';
+import { EventEntity } from './event.entity';
+import { PageResponse } from '../../utils/pageables/page-response.utils';
+
+type EventWithRelations = EventEntity & {
+  category: null;
+  createdBy: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    createdAt: Date;
+    updatedAt: Date;
+  };
+};
 
 describe('EventController', () => {
   let controller: EventController;
   let eventService: DeepMocked<EventService>;
-  let cacheService: DeepMocked<CacheService>;
 
   const mockUser: UserEntity = {
     id: 'user-id',
@@ -24,7 +38,7 @@ describe('EventController', () => {
     updatedAt: new Date(),
   };
 
-  const mockEvent = {
+  const mockEvent: EventWithRelations = {
     id: 'event-id',
     title: 'Test Event',
     description: 'Test Description',
@@ -92,7 +106,9 @@ describe('EventController', () => {
         },
       };
 
-      eventService.findPageableEvents.mockResolvedValue(mockResult as any);
+      eventService.findPageableEvents.mockResolvedValue(
+        mockResult as unknown as PageResponse<EventWithRelations>,
+      );
 
       const result = await controller.getEvents(queryDto);
 
@@ -115,7 +131,7 @@ describe('EventController', () => {
         createdById: 'user-id',
       };
 
-      eventService.createEvent.mockResolvedValue(mockEvent as any);
+      eventService.createEvent.mockResolvedValue(mockEvent);
 
       const result = await controller.createEvent(createDto, mockUser);
 
@@ -127,7 +143,7 @@ describe('EventController', () => {
 
   describe('getEventById', () => {
     it('should return an event by id', async () => {
-      eventService.findEventByIdOrThrow.mockResolvedValue(mockEvent as any);
+      eventService.findEventByIdOrThrow.mockResolvedValue(mockEvent);
 
       const result = await controller.getEventById(mockEvent.id);
 
@@ -143,7 +159,7 @@ describe('EventController', () => {
       const updateDto: UpdateEventDto = { title: 'Updated Title' };
       const updatedEvent = { ...mockEvent, ...updateDto };
 
-      eventService.updateEvent.mockResolvedValue(updatedEvent as any);
+      eventService.updateEvent.mockResolvedValue(updatedEvent);
 
       const result = await controller.updateEvent(mockEvent.id, updateDto);
 
@@ -157,7 +173,7 @@ describe('EventController', () => {
 
   describe('deleteEvent', () => {
     it('should delete an event', async () => {
-      eventService.deleteEvent.mockResolvedValue(mockEvent as any);
+      eventService.deleteEvent.mockResolvedValue(mockEvent);
 
       const result = await controller.deleteEvent(mockEvent.id);
 

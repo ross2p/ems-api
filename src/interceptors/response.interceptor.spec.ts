@@ -1,6 +1,7 @@
 import { ResponseInterceptor } from './response.interceptor';
 import { Reflector } from '@nestjs/core';
 import { ExecutionContext, CallHandler } from '@nestjs/common';
+import { HttpArgumentsHost } from '@nestjs/common/interfaces';
 import { of } from 'rxjs';
 import { RESPONSE_MESSAGE_KEY } from '../utils';
 import { SuccessResponse } from '../utils/responses';
@@ -27,12 +28,14 @@ describe('ResponseInterceptor', () => {
       statusCode,
     };
 
-    const mockHttpContext = {
+    const mockHttpContext: HttpArgumentsHost = {
+      getRequest: jest.fn(),
       getResponse: jest.fn().mockReturnValue(mockResponse),
+      getNext: jest.fn(),
     };
 
     const mockExecutionContext = createMock<ExecutionContext>({
-      switchToHttp: jest.fn().mockReturnValue(mockHttpContext as any),
+      switchToHttp: jest.fn().mockReturnValue(mockHttpContext),
       getHandler: jest.fn().mockReturnValue(() => {}),
     });
 
@@ -40,16 +43,15 @@ describe('ResponseInterceptor', () => {
       handle: jest.fn().mockReturnValue(of(data)),
     });
 
-    // By default, reflector.get will return undefined if no metadata is set
     jest.spyOn(reflector, 'get').mockReturnValue(undefined);
 
     interceptor
       .intercept(mockExecutionContext, mockCallHandler)
-      .subscribe((result) => {
+      .subscribe((result: SuccessResponse) => {
         expect(result).toBeInstanceOf(SuccessResponse);
         expect(result.data).toEqual(data);
         expect(result.statusCode).toBe(statusCode);
-        expect(result.message).toBe('Success'); // default message from SuccessResponse
+        expect(result.message).toBe('Success');
 
         expect(mockExecutionContext.switchToHttp).toHaveBeenCalled();
         expect(mockHttpContext.getResponse).toHaveBeenCalled();
@@ -72,12 +74,14 @@ describe('ResponseInterceptor', () => {
       statusCode,
     };
 
-    const mockHttpContext = {
+    const mockHttpContext: HttpArgumentsHost = {
+      getRequest: jest.fn(),
       getResponse: jest.fn().mockReturnValue(mockResponse),
+      getNext: jest.fn(),
     };
 
     const mockExecutionContext = createMock<ExecutionContext>({
-      switchToHttp: jest.fn().mockReturnValue(mockHttpContext as any),
+      switchToHttp: jest.fn().mockReturnValue(mockHttpContext),
       getHandler: jest.fn().mockReturnValue(() => {}),
     });
 
@@ -89,7 +93,7 @@ describe('ResponseInterceptor', () => {
 
     interceptor
       .intercept(mockExecutionContext, mockCallHandler)
-      .subscribe((result) => {
+      .subscribe((result: SuccessResponse) => {
         expect(result).toBeInstanceOf(SuccessResponse);
         expect(result.data).toEqual(data);
         expect(result.statusCode).toBe(statusCode);

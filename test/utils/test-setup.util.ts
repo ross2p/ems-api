@@ -9,8 +9,11 @@ export interface TestEnvironment {
 }
 
 export function setupTestEnvironment(): TestEnvironment {
-  const env: TestEnvironment = {
-    app: null as any,
+  const env: {
+    app: INestApplication | null;
+    dbEnv: TestDatabaseEnvironment;
+  } = {
+    app: null,
     dbEnv: new TestDatabaseEnvironment(),
   };
 
@@ -36,5 +39,5 @@ export function setupTestEnvironment(): TestEnvironment {
     await env.dbEnv.reset();
   });
 
-  return env;
+  return env as TestEnvironment;
 }

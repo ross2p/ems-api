@@ -56,7 +56,9 @@ describe('AuthGuard', () => {
         .mockReturnValue({ getRequest: () => mockRequest }),
     } as unknown as ExecutionContext;
 
-    authService.validateAccessToken.mockResolvedValue(null as any);
+    authService.validateAccessToken.mockResolvedValue(
+      null as unknown as UserEntity,
+    );
 
     await expect(authGuard.canActivate(mockContext)).rejects.toThrow(
       UnauthorizedException,

@@ -13,7 +13,7 @@ describe('AttendanceService (Integration)', () => {
   let testEventId: string;
   let testCategoryId: string;
 
-  beforeAll(async () => {
+  beforeAll(() => {
     attendanceService = env.app.get(AttendanceService);
   });
 

@@ -2,6 +2,13 @@ import request from 'supertest';
 import { setupTestEnvironment } from '../../../utils/test-setup.util';
 import { getAuthDetails } from '../../../e2e/utils/get-auth-details.utils';
 import { randomUUID } from 'node:crypto';
+import { ApiBody, httpServer, PageData } from '../../utils/typed-request.utils';
+
+interface CategoryData {
+  id: string;
+  name: string;
+  description: string | null;
+}
 
 describe('CategoryController (e2e)', () => {
   const env = setupTestEnvironment();
@@ -10,7 +17,7 @@ describe('CategoryController (e2e)', () => {
     it('should create a new category when authenticated', async () => {
       const { token } = await getAuthDetails(env.app);
 
-      const response = await request(env.app.getHttpServer())
+      const response = await request(httpServer(env.app))
         .post('/category')
         .set('Authorization', `Bearer ${token}`)
         .send({
@@ -19,15 +26,14 @@ describe('CategoryController (e2e)', () => {
         })
         .expect(201);
 
-      expect(response.body.message).toBe('Category created successfully');
-      expect(response.body.data.name).toBe('Tech Events');
-      expect(response.body.data.description).toBe(
-        'All technology related events',
-      );
+      const body = response.body as ApiBody<CategoryData>;
+      expect(body.message).toBe('Category created successfully');
+      expect(body.data.name).toBe('Tech Events');
+      expect(body.data.description).toBe('All technology related events');
     });
 
     it('should fail to create category when not authenticated', async () => {
-      await request(env.app.getHttpServer())
+      await request(httpServer(env.app))
         .post('/category')
         .send({
           name: 'Tech Events',
@@ -41,29 +47,29 @@ describe('CategoryController (e2e)', () => {
     it('should retrieve a paginated list of categories', async () => {
       const { token } = await getAuthDetails(env.app);
 
-      // Create some categories first
-      await request(env.app.getHttpServer())
+      await request(httpServer(env.app))
         .post('/category')
         .set('Authorization', `Bearer ${token}`)
         .send({ name: 'Cat 1', description: 'Desc 1' })
         .expect(201);
 
-      await request(env.app.getHttpServer())
+      await request(httpServer(env.app))
         .post('/category')
         .set('Authorization', `Bearer ${token}`)
         .send({ name: 'Cat 2', description: 'Desc 2' })
         .expect(201);
 
-      const response = await request(env.app.getHttpServer())
+      const response = await request(httpServer(env.app))
         .get('/category')
         .set('Authorization', `Bearer ${token}`)
         .expect(200);
 
-      expect(response.body.message).toBe('Categories retrieved successfully');
-      expect(response.body.data.content.length).toBeGreaterThanOrEqual(2);
+      const body = response.body as ApiBody<PageData<CategoryData>>;
+      expect(body.message).toBe('Categories retrieved successfully');
+      expect(body.data.content.length).toBeGreaterThanOrEqual(2);
     });
     it('should fail with 401 if user unauthorized', async () => {
-      await request(env.app.getHttpServer()).get('/category').expect(401);
+      await request(httpServer(env.app)).get('/category').expect(401);
     });
   });
 
@@ -71,28 +77,30 @@ describe('CategoryController (e2e)', () => {
     it('should retrieve a category by its ID', async () => {
       const { token } = await getAuthDetails(env.app);
 
-      const createResponse = await request(env.app.getHttpServer())
+      const createResponse = await request(httpServer(env.app))
         .post('/category')
         .set('Authorization', `Bearer ${token}`)
         .send({ name: 'Specific Category', description: 'Desc' })
         .expect(201);
 
-      const categoryId = createResponse.body.data.id;
+      const createBody = createResponse.body as ApiBody<CategoryData>;
+      const categoryId = createBody.data.id;
 
-      const response = await request(env.app.getHttpServer())
+      const response = await request(httpServer(env.app))
         .get(`/category/${categoryId}`)
         .set('Authorization', `Bearer ${token}`)
         .expect(200);
 
-      expect(response.body.message).toBe('Category found successfully');
-      expect(response.body.data.id).toBe(categoryId);
-      expect(response.body.data.name).toBe('Specific Category');
+      const body = response.body as ApiBody<CategoryData>;
+      expect(body.message).toBe('Category found successfully');
+      expect(body.data.id).toBe(categoryId);
+      expect(body.data.name).toBe('Specific Category');
     });
 
     it('should fail with 404 if category not found', async () => {
       const { token } = await getAuthDetails(env.app);
       const invalidCategoryId = randomUUID();
-      await request(env.app.getHttpServer())
+      await request(httpServer(env.app))
         .get(`/category/${invalidCategoryId}`)
         .set('Authorization', `Bearer ${token}`)
         .expect(404);
@@ -100,7 +108,7 @@ describe('CategoryController (e2e)', () => {
 
     it('should fail with 400 if categoryId is incorrect format', async () => {
       const { token } = await getAuthDetails(env.app);
-      await request(env.app.getHttpServer())
+      await request(httpServer(env.app))
         .get('/category/invalid-uuid')
         .set('Authorization', `Bearer ${token}`)
         .expect(400);
@@ -108,7 +116,7 @@ describe('CategoryController (e2e)', () => {
 
     it('should fail with 401 if user unauthorized', async () => {
       const invalidCategoryId = randomUUID();
-      await request(env.app.getHttpServer())
+      await request(httpServer(env.app))
         .get(`/category/${invalidCategoryId}`)
         .expect(401);
     });
@@ -118,27 +126,29 @@ describe('CategoryController (e2e)', () => {
     it('should update a category when authenticated', async () => {
       const { token } = await getAuthDetails(env.app);
 
-      const createResponse = await request(env.app.getHttpServer())
+      const createResponse = await request(httpServer(env.app))
         .post('/category')
         .set('Authorization', `Bearer ${token}`)
         .send({ name: 'Old Name', description: 'Old desc' })
         .expect(201);
 
-      const categoryId = createResponse.body.data.id;
+      const createBody = createResponse.body as ApiBody<CategoryData>;
+      const categoryId = createBody.data.id;
 
-      const response = await request(env.app.getHttpServer())
+      const response = await request(httpServer(env.app))
         .patch(`/category/${categoryId}`)
         .set('Authorization', `Bearer ${token}`)
         .send({ name: 'New Name' })
         .expect(200);
 
-      expect(response.body.message).toBe('Category updated successfully');
-      expect(response.body.data.name).toBe('New Name');
+      const body = response.body as ApiBody<CategoryData>;
+      expect(body.message).toBe('Category updated successfully');
+      expect(body.data.name).toBe('New Name');
     });
 
     it('should fail with 400 if categoryId is incorrect format', async () => {
       const { token } = await getAuthDetails(env.app);
-      await request(env.app.getHttpServer())
+      await request(httpServer(env.app))
         .patch('/category/invalid-uuid')
         .set('Authorization', `Bearer ${token}`)
         .send({ name: 'New Name' })
@@ -148,7 +158,7 @@ describe('CategoryController (e2e)', () => {
     it('should fail with 404 if category not found', async () => {
       const { token } = await getAuthDetails(env.app);
       const invalidCategoryId = randomUUID();
-      await request(env.app.getHttpServer())
+      await request(httpServer(env.app))
         .patch(`/category/${invalidCategoryId}`)
         .set('Authorization', `Bearer ${token}`)
         .send({ name: 'New Name' })
@@ -157,7 +167,7 @@ describe('CategoryController (e2e)', () => {
 
     it('should fail to update category when unauthorized', async () => {
       const invalidCategoryId = randomUUID();
-      await request(env.app.getHttpServer())
+      await request(httpServer(env.app))
         .patch(`/category/${invalidCategoryId}`)
         .send({ name: 'New Name' })
         .expect(401);
@@ -168,30 +178,31 @@ describe('CategoryController (e2e)', () => {
     it('should delete a category when authenticated', async () => {
       const { token } = await getAuthDetails(env.app);
 
-      const createResponse = await request(env.app.getHttpServer())
+      const createResponse = await request(httpServer(env.app))
         .post('/category')
         .set('Authorization', `Bearer ${token}`)
         .send({ name: 'To Delete', description: 'desc' })
         .expect(201);
 
-      const categoryId = createResponse.body.data.id;
+      const createBody = createResponse.body as ApiBody<CategoryData>;
+      const categoryId = createBody.data.id;
 
-      const deleteResponse = await request(env.app.getHttpServer())
+      const deleteResponse = await request(httpServer(env.app))
         .delete(`/category/${categoryId}`)
         .set('Authorization', `Bearer ${token}`)
         .expect(200);
 
-      expect(deleteResponse.body.message).toBe('Category deleted successfully');
+      const deleteBody = deleteResponse.body as ApiBody<unknown>;
+      expect(deleteBody.message).toBe('Category deleted successfully');
 
-      // Verify it's gone
-      await request(env.app.getHttpServer())
+      await request(httpServer(env.app))
         .get(`/category/${categoryId}`)
         .set('Authorization', `Bearer ${token}`)
         .expect(404);
     });
     it('should fail with 400 if categoryId is incorrect format', async () => {
       const { token } = await getAuthDetails(env.app);
-      await request(env.app.getHttpServer())
+      await request(httpServer(env.app))
         .delete('/category/invalid-uuid')
         .set('Authorization', `Bearer ${token}`)
         .expect(400);
@@ -200,7 +211,7 @@ describe('CategoryController (e2e)', () => {
     it('should fail with 404 if category not found', async () => {
       const { token } = await getAuthDetails(env.app);
       const invalidCategoryId = randomUUID();
-      await request(env.app.getHttpServer())
+      await request(httpServer(env.app))
         .delete(`/category/${invalidCategoryId}`)
         .set('Authorization', `Bearer ${token}`)
         .expect(404);
@@ -208,7 +219,7 @@ describe('CategoryController (e2e)', () => {
 
     it('should fail to delete category when unauthorized', async () => {
       const invalidCategoryId = randomUUID();
-      await request(env.app.getHttpServer())
+      await request(httpServer(env.app))
         .delete(`/category/${invalidCategoryId}`)
         .expect(401);
     });

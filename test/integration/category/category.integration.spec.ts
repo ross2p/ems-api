@@ -1,8 +1,8 @@
-import { setupTestEnvironment } from '../../../utils/test-setup.util';
-import { CategoryService } from '../../@modules/category/category.service';
-import { CreateCategoryDto } from '../../@modules/category/dto/create-category.dto';
-import { UpdateCategoryDto } from '../../@modules/category/dto/update-category.dto';
-import { CategoryFilterDto } from '../../@modules/category/dto/category-filter.dto';
+import { setupTestEnvironment } from '../../utils/test-setup.util';
+import { CategoryService } from '@/modules/category/category.service';
+import { CreateCategoryDto } from '@/modules/category/dto/create-category.dto';
+import { UpdateCategoryDto } from '@/modules/category/dto/update-category.dto';
+import { CategoryFilterDto } from '@/modules/category/dto/category-filter.dto';
 import { NotFoundException } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 
@@ -12,7 +12,7 @@ describe('CategoryService (Integration)', () => {
 
   let testUserId: string;
 
-  beforeAll(async () => {
+  beforeAll(() => {
     categoryService = env.app.get(CategoryService);
   });
 

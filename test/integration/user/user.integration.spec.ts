@@ -1,12 +1,15 @@
-import { setupTestEnvironment } from '../../../utils/test-setup.util';
-import { UserService } from '../../@modules/user/user.service';
-import { CreateUserDto } from '../../@modules/user/dtos/create-user.dto';
-import { UpdateUserDto } from '../../@modules/user/dtos/update-user.dto';
+import {
+  setupTestEnvironment,
+  TestEnvironment,
+} from '../../utils/test-setup.util';
+import { UserService } from '@/modules/user/user.service';
+import { CreateUserDto } from '@/modules/user/dtos/create-user.dto';
+import { UpdateUserDto } from '@/modules/user/dtos/update-user.dto';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 
 describe('UserService (Integration)', () => {
-  const env = setupTestEnvironment();
+  const env: TestEnvironment = setupTestEnvironment();
   let userService: UserService;
 
   beforeAll(() => {
@@ -40,9 +43,10 @@ describe('UserService (Integration)', () => {
       expect(userInDb?.password).toBeDefined();
       expect(userInDb?.password).not.toBe(dto.password);
 
+      const hashedPassword = userInDb!.password;
       const isPasswordHashed = await bcrypt.compare(
         dto.password,
-        userInDb!.password as string,
+        String(hashedPassword),
       );
       expect(isPasswordHashed).toBe(true);
     });
@@ -190,9 +194,11 @@ describe('UserService (Integration)', () => {
       expect(foundUser.email).toBe(dto.email);
       expect(foundUser.password).toBeDefined();
 
+      const hashedPassword = foundUser.password;
+      expect(hashedPassword).toBeDefined();
       const isMatch = await bcrypt.compare(
         dto.password,
-        foundUser.password as string,
+        String(hashedPassword),
       );
       expect(isMatch).toBe(true);
     });

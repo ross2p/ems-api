@@ -1,10 +1,12 @@
 import { ArgumentsHost } from '@nestjs/common';
+import { HttpArgumentsHost } from '@nestjs/common/interfaces';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { IExceptionHandler } from './i-exception.filter';
 import { ErrorResponse } from '../utils/responses';
 
 class ConcreteFilter extends IExceptionHandler {
-  handle(_exception: unknown): ErrorResponse {
+  handle(exception: unknown): ErrorResponse {
+    void exception;
     return new ErrorResponse({ message: 'test error', statusCode: 500 });
   }
 }
@@ -26,8 +28,10 @@ describe('IExceptionHandler', () => {
 
       host.getType.mockReturnValue('http');
       host.switchToHttp.mockReturnValue({
+        getRequest: jest.fn(),
         getResponse: mockGetResponse,
-      } as any);
+        getNext: jest.fn(),
+      } as HttpArgumentsHost);
 
       filter.catch(new Error('test'), host);
 
@@ -64,7 +68,7 @@ describe('IExceptionHandler', () => {
 
   describe('catch - unknown context', () => {
     it('should return undefined', () => {
-      host.getType.mockReturnValue('graphql' as any);
+      host.getType.mockReturnValue('graphql' as unknown as 'http');
 
       const result = filter.catch(new Error('test'), host);
 

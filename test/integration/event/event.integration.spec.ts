@@ -1,20 +1,23 @@
-import { setupTestEnvironment } from '../../../utils/test-setup.util';
-import { EventService } from '../../@modules/event/event.service';
-import { CreateEventDto } from '../../@modules/event/dto/create-event.dto';
-import { UpdateEventDto } from '../../@modules/event/dto/update-event.dto';
-import { EventFilterDto } from '../../@modules/event/dto/event-filter.dto';
+import {
+  setupTestEnvironment,
+  TestEnvironment,
+} from '../../utils/test-setup.util';
+import { EventService } from '@/modules/event/event.service';
+import { CreateEventDto } from '@/modules/event/dto/create-event.dto';
+import { UpdateEventDto } from '@/modules/event/dto/update-event.dto';
+import { EventFilterDto } from '@/modules/event/dto/event-filter.dto';
 import { NotFoundException } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 
 describe('EventService (Integration)', () => {
-  const env = setupTestEnvironment();
+  const env: TestEnvironment = setupTestEnvironment();
   let eventService: EventService;
 
   // We need a user and a category in the DB to associate with events
   let testUserId: string;
   let testCategoryId: string;
 
-  beforeAll(async () => {
+  beforeAll(() => {
     eventService = env.app.get(EventService);
   });
 

@@ -104,7 +104,7 @@ export class EventRepository {
       .addRadiusFilter(filter.latitude, filter.longitude, filter.radiusKm);
 
     const { where } = builder.build();
-    let { orderBy } = builder.build();
+    const { orderBy } = builder.build();
 
     if (filter.startDate) {
       orderBy.push({ startDate: 'asc' });

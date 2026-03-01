@@ -5,6 +5,7 @@ import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { CacheService } from '../../cache/cache.service';
 import { UserEntity } from '../../user/user.entity';
 import { AuthGuard } from '../../../guards/user.guard';
+import { EventWithScoreDto } from './dto/event-with-score.dto';
 
 describe('EventRecommendationController', () => {
   let controller: EventRecommendationController;
@@ -50,7 +51,9 @@ describe('EventRecommendationController', () => {
         return fn();
       });
 
-      service.getRecommendedEvents.mockResolvedValue(expectedResult as any);
+      service.getRecommendedEvents.mockResolvedValue(
+        expectedResult as EventWithScoreDto[],
+      );
 
       const result = await controller.getRecommendations(eventId, user);
 

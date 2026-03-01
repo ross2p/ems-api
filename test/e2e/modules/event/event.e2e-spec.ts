@@ -4,6 +4,15 @@ import { setupTestEnvironment } from '../../../utils/test-setup.util';
 import { getAuthDetails } from '../../../e2e/utils/get-auth-details.utils';
 import { HttpStatus } from '@nestjs/common';
 import { VALIDATION_MESSAGE } from '../../utils/constants';
+import { ApiBody, httpServer, PageData } from '../../utils/typed-request.utils';
+
+interface EventData {
+  id: string;
+  title: string;
+  description: string;
+  location: string;
+  createdById: string;
+}
 
 describe('EventController (e2e)', () => {
   const env = setupTestEnvironment();
@@ -19,7 +28,7 @@ describe('EventController (e2e)', () => {
 
   describe('/event (POST)', () => {
     it('should create a new event', async () => {
-      const response = await request(env.app.getHttpServer())
+      const response = await request(httpServer(env.app))
         .post('/event')
         .set('Authorization', `Bearer ${token1}`)
         .send({
@@ -31,13 +40,14 @@ describe('EventController (e2e)', () => {
         })
         .expect(201);
 
-      expect(response.body.message).toBe('Event created successfully');
-      expect(response.body.data.title).toBe('Future Tech Conference');
-      expect(response.body.data.createdById).toBe(userId1);
+      const body = response.body as ApiBody<EventData>;
+      expect(body.message).toBe('Event created successfully');
+      expect(body.data.title).toBe('Future Tech Conference');
+      expect(body.data.createdById).toBe(userId1);
     });
 
     it('should fail with validation error when end date is before start date', async () => {
-      await request(env.app.getHttpServer())
+      await request(httpServer(env.app))
         .post('/event')
         .set('Authorization', `Bearer ${token1}`)
         .send({
@@ -51,14 +61,13 @@ describe('EventController (e2e)', () => {
     });
 
     it('should fail with 401 if no token provided', async () => {
-      await request(env.app.getHttpServer()).post('/event').expect(401);
+      await request(httpServer(env.app)).post('/event').expect(401);
     });
   });
 
   describe('/event (GET)', () => {
     it('should retrieve a paginated list of events', async () => {
-      // Create an event first
-      await request(env.app.getHttpServer())
+      await request(httpServer(env.app))
         .post('/event')
         .set('Authorization', `Bearer ${token1}`)
         .send({
@@ -70,23 +79,24 @@ describe('EventController (e2e)', () => {
         })
         .expect(201);
 
-      const response = await request(env.app.getHttpServer())
+      const response = await request(httpServer(env.app))
         .get('/event')
         .set('Authorization', `Bearer ${token1}`)
         .expect(200);
 
-      expect(response.body.message).toBe('Events retrieved successfully');
-      expect(response.body.data.content.length).toBeGreaterThan(0);
-      expect(response.body.data.content[0].title).toBeDefined();
+      const body = response.body as ApiBody<PageData<EventData>>;
+      expect(body.message).toBe('Events retrieved successfully');
+      expect(body.data.content.length).toBeGreaterThan(0);
+      expect(body.data.content[0].title).toBeDefined();
     });
     it('should fail with 401 if no token provided', async () => {
-      await request(env.app.getHttpServer()).get('/event').expect(401);
+      await request(httpServer(env.app)).get('/event').expect(401);
     });
   });
 
   describe('/event/:id (GET)', () => {
     it('should retrieve an event by ID', async () => {
-      const createResponse = await request(env.app.getHttpServer())
+      const createResponse = await request(httpServer(env.app))
         .post('/event')
         .set('Authorization', `Bearer ${token1}`)
         .send({
@@ -98,30 +108,33 @@ describe('EventController (e2e)', () => {
         })
         .expect(201);
 
-      const eventId = createResponse.body.data.id;
+      const createBody = createResponse.body as ApiBody<EventData>;
+      const eventId = createBody.data.id;
 
-      const response = await request(env.app.getHttpServer())
+      const response = await request(httpServer(env.app))
         .get(`/event/${eventId}`)
         .set('Authorization', `Bearer ${token1}`)
         .expect(200);
 
-      expect(response.body.message).toBe('Event found successfully');
-      expect(response.body.data.id).toBe(eventId);
-      expect(response.body.data.title).toBe('Specific Event');
+      const body = response.body as ApiBody<EventData>;
+      expect(body.message).toBe('Event found successfully');
+      expect(body.data.id).toBe(eventId);
+      expect(body.data.title).toBe('Specific Event');
     });
 
     it('should return 400 for invalid event id', async () => {
       const invalidEventId = 'invalid';
-      const response = await request(env.app.getHttpServer())
+      const response = await request(httpServer(env.app))
         .get(`/event/${invalidEventId}`)
         .set('Authorization', `Bearer ${token1}`)
         .expect(HttpStatus.BAD_REQUEST);
 
-      expect(response.body.message).toEqual(VALIDATION_MESSAGE);
+      const body = response.body as ApiBody<unknown>;
+      expect(body.message).toEqual(VALIDATION_MESSAGE);
     });
 
     it('should fail with 401 if no token provided', async () => {
-      const createResponse = await request(env.app.getHttpServer())
+      const createResponse = await request(httpServer(env.app))
         .post('/event')
         .set('Authorization', `Bearer ${token1}`)
         .send({
@@ -133,15 +146,14 @@ describe('EventController (e2e)', () => {
         })
         .expect(201);
 
-      const eventId = createResponse.body.data.id;
-      await request(env.app.getHttpServer())
-        .get(`/event/${eventId}`)
-        .expect(401);
+      const createBody = createResponse.body as ApiBody<EventData>;
+      const eventId = createBody.data.id;
+      await request(httpServer(env.app)).get(`/event/${eventId}`).expect(401);
     });
 
     it('should return 404 for non-existent event', async () => {
       const invalidEventId = randomUUID();
-      await request(env.app.getHttpServer())
+      await request(httpServer(env.app))
         .get(`/event/${invalidEventId}`)
         .set('Authorization', `Bearer ${token1}`)
         .expect(HttpStatus.NOT_FOUND);
@@ -150,7 +162,7 @@ describe('EventController (e2e)', () => {
 
   describe('/event/:id (PATCH)', () => {
     it('should update an event successfully', async () => {
-      const createResponse = await request(env.app.getHttpServer())
+      const createResponse = await request(httpServer(env.app))
         .post('/event')
         .set('Authorization', `Bearer ${token1}`)
         .send({
@@ -162,9 +174,10 @@ describe('EventController (e2e)', () => {
         })
         .expect(201);
 
-      const eventId = createResponse.body.data.id;
+      const createBody = createResponse.body as ApiBody<EventData>;
+      const eventId = createBody.data.id;
 
-      const response = await request(env.app.getHttpServer())
+      const response = await request(httpServer(env.app))
         .patch(`/event/${eventId}`)
         .set('Authorization', `Bearer ${token1}`)
         .send({
@@ -173,14 +186,15 @@ describe('EventController (e2e)', () => {
         })
         .expect(200);
 
-      expect(response.body.message).toBe('Event updated successfully');
-      expect(response.body.data.title).toBe('New Event Title');
-      expect(response.body.data.location).toBe('New Location');
-      expect(response.body.data.description).toBe('Old description');
+      const body = response.body as ApiBody<EventData>;
+      expect(body.message).toBe('Event updated successfully');
+      expect(body.data.title).toBe('New Event Title');
+      expect(body.data.location).toBe('New Location');
+      expect(body.data.description).toBe('Old description');
     });
 
     it('should return 400 for invalid event id', async () => {
-      await request(env.app.getHttpServer())
+      await request(httpServer(env.app))
         .post('/event')
         .set('Authorization', `Bearer ${token1}`)
         .send({
@@ -194,7 +208,7 @@ describe('EventController (e2e)', () => {
 
       const eventId = 'invalid-id';
 
-      const response = await request(env.app.getHttpServer())
+      const response = await request(httpServer(env.app))
         .patch(`/event/${eventId}`)
         .set('Authorization', `Bearer ${token1}`)
         .send({
@@ -203,11 +217,12 @@ describe('EventController (e2e)', () => {
         })
         .expect(HttpStatus.BAD_REQUEST);
 
-      expect(response.body.message).toEqual(VALIDATION_MESSAGE);
+      const body = response.body as ApiBody<unknown>;
+      expect(body.message).toEqual(VALIDATION_MESSAGE);
     });
 
     it('should fail with 401 if no token provided', async () => {
-      const createResponse = await request(env.app.getHttpServer())
+      const createResponse = await request(httpServer(env.app))
         .post('/event')
         .set('Authorization', `Bearer ${token1}`)
         .send({
@@ -219,16 +234,15 @@ describe('EventController (e2e)', () => {
         })
         .expect(201);
 
-      const eventId = createResponse.body.data.id;
-      await request(env.app.getHttpServer())
-        .patch(`/event/${eventId}`)
-        .expect(401);
+      const createBody = createResponse.body as ApiBody<EventData>;
+      const eventId = createBody.data.id;
+      await request(httpServer(env.app)).patch(`/event/${eventId}`).expect(401);
     });
   });
 
   describe('/event/:id (DELETE)', () => {
     it('should delete an event successfully', async () => {
-      const createResponse = await request(env.app.getHttpServer())
+      const createResponse = await request(httpServer(env.app))
         .post('/event')
         .set('Authorization', `Bearer ${token1}`)
         .send({
@@ -240,16 +254,18 @@ describe('EventController (e2e)', () => {
         })
         .expect(201);
 
-      const eventId = createResponse.body.data.id;
+      const createBody = createResponse.body as ApiBody<EventData>;
+      const eventId = createBody.data.id;
 
-      const response = await request(env.app.getHttpServer())
+      const response = await request(httpServer(env.app))
         .delete(`/event/${eventId}`)
         .set('Authorization', `Bearer ${token1}`)
         .expect(200);
 
-      expect(response.body.message).toBe('Event deleted successfully');
+      const body = response.body as ApiBody<unknown>;
+      expect(body.message).toBe('Event deleted successfully');
 
-      await request(env.app.getHttpServer())
+      await request(httpServer(env.app))
         .get(`/event/${eventId}`)
         .set('Authorization', `Bearer ${token1}`)
         .expect(404);
@@ -257,16 +273,17 @@ describe('EventController (e2e)', () => {
 
     it('should return 400 for invalid event id', async () => {
       const invalidEventId = 'invalid';
-      const response = await request(env.app.getHttpServer())
+      const response = await request(httpServer(env.app))
         .delete(`/event/${invalidEventId}`)
         .set('Authorization', `Bearer ${token1}`)
         .expect(HttpStatus.BAD_REQUEST);
 
-      expect(response.body.message).toEqual(VALIDATION_MESSAGE);
+      const body = response.body as ApiBody<unknown>;
+      expect(body.message).toEqual(VALIDATION_MESSAGE);
     });
 
     it('should fail with 401 if no token provided', async () => {
-      const createResponse = await request(env.app.getHttpServer())
+      const createResponse = await request(httpServer(env.app))
         .post('/event')
         .set('Authorization', `Bearer ${token1}`)
         .send({
@@ -278,15 +295,16 @@ describe('EventController (e2e)', () => {
         })
         .expect(201);
 
-      const eventId = createResponse.body.data.id;
-      await request(env.app.getHttpServer())
+      const createBody = createResponse.body as ApiBody<EventData>;
+      const eventId = createBody.data.id;
+      await request(httpServer(env.app))
         .delete(`/event/${eventId}`)
         .expect(401);
     });
 
     it('should fail with 404 if not found', async () => {
       const invalidEventId = randomUUID();
-      await request(env.app.getHttpServer())
+      await request(httpServer(env.app))
         .delete(`/event/${invalidEventId}`)
         .set('Authorization', `Bearer ${token1}`)
         .expect(HttpStatus.NOT_FOUND);

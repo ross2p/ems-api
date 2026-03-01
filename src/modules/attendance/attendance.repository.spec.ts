@@ -83,8 +83,8 @@ describe('AttendanceRepository', () => {
 
       expect(databaseService.attendance.findMany).toHaveBeenCalledWith({
         where: { eventId: filters.eventId },
-        skip: expect.any(Number),
-        take: expect.any(Number),
+        skip: expect.any(Number) as unknown as number,
+        take: expect.any(Number) as unknown as number,
       });
       expect(databaseService.attendance.count).toHaveBeenCalledWith({
         where: { eventId: filters.eventId },

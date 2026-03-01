@@ -6,11 +6,11 @@ import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { EventFilterDto } from './dto/event-filter.dto';
 import { EventEntity } from './event.entity';
+import { Prisma } from '@generated/prisma';
 
 describe('EventRepository', () => {
   let repository: EventRepository;
-  let databaseService: DeepMocked<DatabaseService>;
-  let mockEventRepository: any;
+  let mockEventRepository: DeepMocked<Prisma.EventDelegate>;
 
   const mockEvent: EventEntity = {
     id: 'event-id',
@@ -28,28 +28,25 @@ describe('EventRepository', () => {
   };
 
   beforeEach(async () => {
-    mockEventRepository = {
-      create: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
-      findUnique: jest.fn(),
-      findMany: jest.fn(),
-      count: jest.fn(),
-    };
+    mockEventRepository = createMock<Prisma.EventDelegate>();
+
+    const mockDatabaseService = createMock<DatabaseService>();
+    Object.defineProperty(mockDatabaseService, 'event', {
+      value: mockEventRepository,
+      configurable: true,
+    });
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         EventRepository,
         {
           provide: DatabaseService,
-          useValue: createMock<DatabaseService>(),
+          useValue: mockDatabaseService,
         },
       ],
     }).compile();
 
     repository = module.get<EventRepository>(EventRepository);
-    // Mock the property access
-    (repository as any).eventRepository = mockEventRepository;
   });
 
   it('should be defined', () => {
@@ -149,9 +146,9 @@ describe('EventRepository', () => {
 
       expect(mockEventRepository.findMany).toHaveBeenCalled();
       const callArgs = mockEventRepository.findMany.mock.calls[0][0];
-      expect(callArgs.where.OR).toBeDefined(); // Search clause
-      expect(callArgs.skip).toBe(0);
-      expect(callArgs.take).toBe(10);
+      expect(callArgs?.where?.OR).toBeDefined();
+      expect(callArgs?.skip).toBe(0);
+      expect(callArgs?.take).toBe(10);
       expect(result).toEqual([mockEvent]);
     });
   });
@@ -188,8 +185,8 @@ describe('EventRepository', () => {
 
       const callArgs = mockEventRepository.findMany.mock.calls[0][0];
 
-      expect(callArgs.where.categoryId).toBe('cat-id');
-      expect(callArgs.where.AND).toEqual(
+      expect(callArgs?.where?.categoryId).toBe('cat-id');
+      expect(callArgs?.where?.AND).toEqual(
         expect.arrayContaining([
           { startDate: { gte: new Date(filterDto.startDate!) } },
           { id: { notIn: ['exclude-id'] } },
@@ -197,7 +194,7 @@ describe('EventRepository', () => {
         ]),
       );
       // specific overrides by context
-      expect(callArgs.take).toBe(10);
+      expect(callArgs?.take).toBe(10);
       expect(result).toEqual([mockEvent]);
     });
   });

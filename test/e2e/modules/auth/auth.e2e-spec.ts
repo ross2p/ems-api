@@ -2,6 +2,17 @@ import request from 'supertest';
 import { HttpStatus } from '@nestjs/common';
 import { setupTestEnvironment } from '../../../utils/test-setup.util';
 import { VALIDATION_MESSAGE } from '../../utils/constants';
+import { ApiBody, httpServer } from '../../utils/typed-request.utils';
+
+interface AuthData {
+  user: { id: string; email: string };
+  accessToken: string;
+  refreshToken: string;
+}
+
+interface ValidationData {
+  data: Array<{ path: string; message: string }>;
+}
 
 describe('AuthController (e2e)', () => {
   const env = setupTestEnvironment();
@@ -15,16 +26,17 @@ describe('AuthController (e2e)', () => {
         password: 'password123',
       };
 
-      const response = await request(env.app.getHttpServer())
+      const response = await request(httpServer(env.app))
         .post('/auth/register')
         .send(registerDto)
         .expect(201);
 
-      expect(response.body.message).toBe('User registered successfully');
-      expect(response.body.data).toHaveProperty('user');
-      expect(response.body.data.user.email).toBe(registerDto.email);
-      expect(response.body.data).toHaveProperty('accessToken');
-      expect(response.body.data).toHaveProperty('refreshToken');
+      const body = response.body as ApiBody<AuthData>;
+      expect(body.message).toBe('User registered successfully');
+      expect(body.data).toHaveProperty('user');
+      expect(body.data.user.email).toBe(registerDto.email);
+      expect(body.data).toHaveProperty('accessToken');
+      expect(body.data).toHaveProperty('refreshToken');
     });
 
     it('should fail if email is already in use', async () => {
@@ -35,31 +47,33 @@ describe('AuthController (e2e)', () => {
         password: 'password123',
       };
 
-      await request(env.app.getHttpServer())
+      await request(httpServer(env.app))
         .post('/auth/register')
         .send(registerDto)
         .expect(HttpStatus.CREATED);
 
-      const response = await request(env.app.getHttpServer())
+      const response = await request(httpServer(env.app))
         .post('/auth/register')
         .send(registerDto)
         .expect(HttpStatus.CONFLICT);
 
-      expect(response.body.statusCode).toBe(HttpStatus.CONFLICT);
+      const body = response.body as ApiBody<unknown>;
+      expect(body.statusCode).toBe(HttpStatus.CONFLICT);
     });
 
     it('should fail validation when fields are missing', async () => {
-      const response = await request(env.app.getHttpServer())
+      const response = await request(httpServer(env.app))
         .post('/auth/register')
         .send({})
         .expect(HttpStatus.BAD_REQUEST);
 
-      expect(response.body.message).toBe(VALIDATION_MESSAGE);
-      expect(response.body.data.data).toContainEqual({
+      const body = response.body as ApiBody<ValidationData>;
+      expect(body.message).toBe(VALIDATION_MESSAGE);
+      expect(body.data.data).toContainEqual({
         path: 'firstName',
         message: 'First name is required',
       });
-      expect(response.body.data.data).toContainEqual({
+      expect(body.data.data).toContainEqual({
         path: 'email',
         message: 'Email is required',
       });
@@ -72,13 +86,14 @@ describe('AuthController (e2e)', () => {
         password: 'password123',
       };
 
-      const response = await request(env.app.getHttpServer())
+      const response = await request(httpServer(env.app))
         .post('/auth/register')
         .send(registerDto)
         .expect(400);
 
-      expect(response.body.message).toBe(VALIDATION_MESSAGE);
-      const str = JSON.stringify(response.body.data);
+      const body = response.body as ApiBody<unknown>;
+      expect(body.message).toBe(VALIDATION_MESSAGE);
+      const str = JSON.stringify(body.data);
       expect(str).toContain('Email must be a valid email');
     });
   });
@@ -92,7 +107,7 @@ describe('AuthController (e2e)', () => {
         password: 'password123',
       };
 
-      await request(env.app.getHttpServer())
+      await request(httpServer(env.app))
         .post('/auth/register')
         .send(registerDto)
         .expect(HttpStatus.CREATED);
@@ -102,16 +117,17 @@ describe('AuthController (e2e)', () => {
         password: 'password123',
       };
 
-      const response = await request(env.app.getHttpServer())
+      const response = await request(httpServer(env.app))
         .post('/auth/login')
         .send(loginDto)
         .expect(HttpStatus.OK);
 
-      expect(response.body.message).toBe('User logged in successfully');
-      expect(response.body.data).toHaveProperty('user');
-      expect(response.body.data.user.email).toBe(loginDto.email);
-      expect(response.body.data).toHaveProperty('accessToken');
-      expect(response.body.data).toHaveProperty('refreshToken');
+      const body = response.body as ApiBody<AuthData>;
+      expect(body.message).toBe('User logged in successfully');
+      expect(body.data).toHaveProperty('user');
+      expect(body.data.user.email).toBe(loginDto.email);
+      expect(body.data).toHaveProperty('accessToken');
+      expect(body.data).toHaveProperty('refreshToken');
     });
 
     it('should fail login with invalid password', async () => {
@@ -122,7 +138,7 @@ describe('AuthController (e2e)', () => {
         password: 'password123',
       };
 
-      await request(env.app.getHttpServer())
+      await request(httpServer(env.app))
         .post('/auth/register')
         .send(registerDto)
         .expect(HttpStatus.CREATED);
@@ -132,12 +148,13 @@ describe('AuthController (e2e)', () => {
         password: 'wrongpassword',
       };
 
-      const response = await request(env.app.getHttpServer())
+      const response = await request(httpServer(env.app))
         .post('/auth/login')
         .send(loginDto)
         .expect(HttpStatus.BAD_REQUEST);
 
-      expect(response.body.message).toBe('Invalid credentials');
+      const body = response.body as ApiBody<unknown>;
+      expect(body.message).toBe('Invalid credentials');
     });
     it('should fail login with invalid email', async () => {
       const loginDto = {
@@ -145,21 +162,23 @@ describe('AuthController (e2e)', () => {
         password: 'password123',
       };
 
-      const response = await request(env.app.getHttpServer())
+      const response = await request(httpServer(env.app))
         .post('/auth/login')
         .send(loginDto)
         .expect(HttpStatus.BAD_REQUEST);
-      expect(response.body.message).toBe('Invalid credentials');
+      const body = response.body as ApiBody<unknown>;
+      expect(body.message).toBe('Invalid credentials');
     });
 
     it('should fail login validation with empty body', async () => {
-      const response = await request(env.app.getHttpServer())
+      const response = await request(httpServer(env.app))
         .post('/auth/login')
         .send({})
         .expect(HttpStatus.BAD_REQUEST);
 
-      expect(response.body.message).toBe(VALIDATION_MESSAGE);
-      const str = JSON.stringify(response.body.data);
+      const body = response.body as ApiBody<unknown>;
+      expect(body.message).toBe(VALIDATION_MESSAGE);
+      const str = JSON.stringify(body.data);
       expect(str).toContain('Email is required');
       expect(str).toContain('Password is required');
     });
@@ -174,39 +193,42 @@ describe('AuthController (e2e)', () => {
         password: 'password123',
       };
 
-      const registerResponse = await request(env.app.getHttpServer())
+      const registerResponse = await request(httpServer(env.app))
         .post('/auth/register')
         .send(registerDto)
         .expect(HttpStatus.CREATED);
 
-      const refreshToken = registerResponse.body.data.refreshToken;
+      const registerBody = registerResponse.body as ApiBody<AuthData>;
+      const refreshToken = registerBody.data.refreshToken;
 
-      const refreshResponse = await request(env.app.getHttpServer())
+      const refreshResponse = await request(httpServer(env.app))
         .post('/auth/refresh')
         .send({ refreshToken })
         .expect(HttpStatus.OK);
 
-      expect(refreshResponse.body.message).toBe('Token refreshed successfully');
-      expect(refreshResponse.body.data).toHaveProperty('accessToken');
+      const refreshBody = refreshResponse.body as ApiBody<{
+        accessToken: string;
+      }>;
+      expect(refreshBody.message).toBe('Token refreshed successfully');
+      expect(refreshBody.data).toHaveProperty('accessToken');
     });
 
     it('should fail to refresh with invalid token', async () => {
-      await request(env.app.getHttpServer())
+      await request(httpServer(env.app))
         .post('/auth/refresh')
         .send({ refreshToken: 'invalid-token-string' })
         .expect(400);
     });
 
     it('should fail to refresh with empty body', async () => {
-      const response = await request(env.app.getHttpServer())
+      const response = await request(httpServer(env.app))
         .post('/auth/refresh')
         .send({})
         .expect(400);
 
-      expect(response.body.message).toBe(VALIDATION_MESSAGE);
-      expect(JSON.stringify(response.body.data)).toContain(
-        'Refresh token is required',
-      );
+      const body = response.body as ApiBody<unknown>;
+      expect(body.message).toBe(VALIDATION_MESSAGE);
+      expect(JSON.stringify(body.data)).toContain('Refresh token is required');
     });
   });
 });

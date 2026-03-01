@@ -1,5 +1,6 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
+import { ApiBody, httpServer } from './typed-request.utils';
 
 type CreateEventDto = {
   title: string;
@@ -14,7 +15,7 @@ export async function createEvent(
   app: INestApplication,
   token: string,
   categoryId?: string,
-) {
+): Promise<string> {
   const payload: CreateEventDto = {
     title: `Test Event ${Date.now()}`,
     description: 'A test event created by helper',
@@ -27,11 +28,12 @@ export async function createEvent(
     payload.categoryId = categoryId;
   }
 
-  const response = await request(app.getHttpServer())
+  const response = await request(httpServer(app))
     .post('/event')
     .set('Authorization', `Bearer ${token}`)
     .send(payload)
     .expect(201);
 
-  return response.body.data.id;
+  const body = response.body as ApiBody<{ id: string }>;
+  return body.data.id;
 }

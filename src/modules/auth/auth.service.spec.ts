@@ -141,11 +141,11 @@ describe('AuthService', () => {
       expect(result).toEqual({ accessToken: mockTokens.accessToken });
     });
 
-    it('should throw UnauthorizedException if payload invalid', () => {
+    it('should throw UnauthorizedException if payload invalid', async () => {
       const dto: RefreshToken = { refreshToken: 'refresh-token' };
       tokenService.verifyTokenByType.mockReturnValue({});
 
-      expect(() => service.refreshToken(dto)).rejects.toThrow(
+      await expect(service.refreshToken(dto)).rejects.toThrow(
         UnauthorizedException,
       );
     });

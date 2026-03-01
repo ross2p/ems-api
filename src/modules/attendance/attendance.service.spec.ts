@@ -181,11 +181,11 @@ describe('AttendanceService', () => {
   describe('findUsersWhoAttendedEvents', () => {
     it('should return users who attended events', async () => {
       const eventIds = ['event-id-1', 'event-id-2'];
-      const users = [
+      const users: AttendanceEntity[] = [
         { ...mockAttendance, userId: 'user-id-1' },
         { ...mockAttendance, userId: 'user-id-2' },
       ];
-      repository.findUsersWhoAttendedEvents.mockResolvedValue(users as any);
+      repository.findUsersWhoAttendedEvents.mockResolvedValue(users);
 
       const result = await service.findUsersWhoAttendedEvents(eventIds);
 

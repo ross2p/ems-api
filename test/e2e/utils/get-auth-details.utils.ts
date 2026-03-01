@@ -1,10 +1,26 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
+import { ApiBody, httpServer } from './typed-request.utils';
 
-export async function getAuthDetails(app: INestApplication) {
+interface AuthData {
+  user: { id: string; email: string };
+  accessToken: string;
+  refreshToken: string;
+}
+
+interface AuthDetails {
+  token: string;
+  userId: string;
+  email: string;
+  password: string;
+}
+
+export async function getAuthDetails(
+  app: INestApplication,
+): Promise<AuthDetails> {
   const uniqueEmail = `user_${Date.now()}_${Math.floor(Math.random() * 1000)}@example.com`;
 
-  const registerResponse = await request(app.getHttpServer())
+  const registerResponse = await request(httpServer(app))
     .post('/auth/register')
     .send({
       firstName: 'Test',
@@ -20,9 +36,11 @@ export async function getAuthDetails(app: INestApplication) {
     );
   }
 
+  const body = registerResponse.body as ApiBody<AuthData>;
+
   return {
-    token: registerResponse.body.data.accessToken,
-    userId: registerResponse.body.data.user.id,
+    token: body.data.accessToken,
+    userId: body.data.user.id,
     email: uniqueEmail,
     password: 'password123',
   };

@@ -3,7 +3,6 @@ import { CacheService } from './cache.service';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
-import { CategoryService } from '../category/category.service';
 import { DEFAULT_TTL } from './cache.constants';
 
 describe('CacheService', () => {
