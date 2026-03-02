@@ -26,6 +26,7 @@ export class RegisterLoginScrapeScenario implements Scenario {
     await this.dashboardPage.logout();
     await this.loginPage.login(email, password);
     await this.eventsPage.navigate();
-    return this.eventsPage.scrapeAllPages();
+    const events = await this.eventsPage.scrapeAllPages();
+    return events;
   }
 }

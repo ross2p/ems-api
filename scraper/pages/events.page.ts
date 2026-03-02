@@ -17,20 +17,19 @@ export class EventsPage extends BasePage {
     chipLabel: '.MuiChip-label',
   } as const;
 
-  constructor(
-    browserService: BrowserService,
-    config: ScraperConfigService,
-  ) {
+  constructor(browserService: BrowserService, config: ScraperConfigService) {
     super(browserService, config);
   }
 
   async navigate(): Promise<void> {
     const { baseUrl } = this.config.get();
-    await this.driver.get(`${baseUrl}/dashboard/events`);
+    await this.driver.get(`${baseUrl}/dashboard`);
 
     await this.driver.wait(
       async () => {
-        const cards = await this.driver.findElements(By.css(this.SELECTORS.card));
+        const cards = await this.driver.findElements(
+          By.css(this.SELECTORS.card),
+        );
         const noEvents = await this.driver.findElements(
           By.xpath(this.SELECTORS.noEventsText),
         );
@@ -43,9 +42,10 @@ export class EventsPage extends BasePage {
 
   async scrapeAllPages(): Promise<ScrapedEvent[]> {
     const allEvents: ScrapedEvent[] = [];
-
+    console.log('scraping all pages');
     while (true) {
       const events = await this.scrapeCurrentPage();
+      console.log('events', events);
       allEvents.push(...events);
 
       const hasNextPage = await this.goToNextPage();
@@ -60,7 +60,9 @@ export class EventsPage extends BasePage {
   }
 
   private async scrapeCurrentPage(): Promise<ScrapedEvent[]> {
+    console.log('scraping current page');
     const cards = await this.driver.findElements(By.css(this.SELECTORS.card));
+    console.log('cards', cards.length);
     const events: ScrapedEvent[] = [];
 
     for (const card of cards) {
@@ -94,9 +96,7 @@ export class EventsPage extends BasePage {
     index: number,
   ): Promise<string> {
     try {
-      const rows = await parent.findElements(
-        By.xpath(this.SELECTORS.iconRow),
-      );
+      const rows = await parent.findElements(By.xpath(this.SELECTORS.iconRow));
       return rows[index] ? await rows[index].getText() : 'N/A';
     } catch {
       return 'N/A';
