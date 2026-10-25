@@ -8,9 +8,11 @@ import { Prisma } from '../../../generated/prisma';
 @Injectable()
 export class CategoryRepository {
   private readonly categoryRepository: Prisma.CategoryDelegate;
+  private readonly eventRepository: Prisma.EventDelegate;
 
   constructor(db: DatabaseService) {
     this.categoryRepository = db.category;
+    this.eventRepository = db.event;
   }
 
   async createCategory(data: CreateCategoryDto) {
@@ -23,6 +25,10 @@ export class CategoryRepository {
 
   async updateCategory(categoryId: string, data: UpdateCategoryDto) {
     return this.categoryRepository.update({ where: { id: categoryId }, data });
+  }
+
+  async countCategoryEvents(categoryId: string) {
+    return this.eventRepository.count({ where: { categoryId } });
   }
 
   async deleteCategory(categoryId: string) {

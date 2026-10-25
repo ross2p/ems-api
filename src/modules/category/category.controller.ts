@@ -30,6 +30,7 @@ import { ValidationPipe } from '../../pipes/validation.pipe';
 import { createCategorySchema } from './schemas/create-category.schema';
 import { updateCategorySchema } from './schemas/update-category.schema';
 import { uuidSchema } from '../../schemas/uuid.schema';
+import { categoryFilterSchema } from './schemas/category-filter.schema';
 
 @ApiTags('Categories')
 @ApiAuth()
@@ -48,11 +49,15 @@ export class CategoryController {
     description: 'Categories retrieved successfully',
   })
   @ApiErrorResponse({
-    status: HttpStatus.INTERNAL_SERVER_ERROR,
-    description: 'Invalid pagination parameters or unexpected server error',
+    status: HttpStatus.BAD_REQUEST,
+    description:
+      'Invalid query parameters or access token is invalid or expired',
   })
   @ResponseMessage('Categories retrieved successfully')
-  async getCategories(@Query() categoryFilterDto: CategoryFilterDto) {
+  async getCategories(
+    @Query(new ValidationPipe(categoryFilterSchema))
+    categoryFilterDto: CategoryFilterDto,
+  ) {
     return this.categoryService.findPageableCategories(categoryFilterDto);
   }
 
@@ -166,8 +171,8 @@ export class CategoryController {
     description: 'Category not found or access token user not found',
   })
   @ApiErrorResponse({
-    status: HttpStatus.INTERNAL_SERVER_ERROR,
-    description: 'Category is still used by events or unexpected server error',
+    status: HttpStatus.CONFLICT,
+    description: 'Category is used by events',
   })
   @ResponseMessage('Category deleted successfully')
   async deleteCategory(

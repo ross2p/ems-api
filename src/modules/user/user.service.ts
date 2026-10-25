@@ -31,6 +31,14 @@ export class UserService {
 
   async updateUser(userId: string, updateUserDto: UpdateUserDto) {
     await this.findUserByIdOrThrow(userId);
+    if (updateUserDto.email) {
+      const userWithEmail = await this.userRepository.findUserByEmail(
+        updateUserDto.email,
+      );
+      if (userWithEmail && userWithEmail.id !== userId) {
+        throw new ConflictException('User already exist');
+      }
+    }
     const dataToUpdate = { ...updateUserDto };
     if (dataToUpdate.password) {
       dataToUpdate.password = await this.hashPassword(dataToUpdate.password);

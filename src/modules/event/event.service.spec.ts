@@ -8,6 +8,7 @@ import { NotFoundException } from '@nestjs/common';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { EventEntity } from './event.entity';
+import { CategoryService } from '../category/category.service';
 
 type EventWithRelations = EventEntity & {
   category: null;
@@ -25,6 +26,7 @@ type EventWithRelations = EventEntity & {
 describe('EventService', () => {
   let service: EventService;
   let eventRepository: DeepMocked<EventRepository>;
+  let categoryService: DeepMocked<CategoryService>;
 
   const mockEvent: EventWithRelations = {
     id: 'event-id',
@@ -59,11 +61,16 @@ describe('EventService', () => {
           provide: EventRepository,
           useValue: createMock<EventRepository>(),
         },
+        {
+          provide: CategoryService,
+          useValue: createMock<CategoryService>(),
+        },
       ],
     }).compile();
 
     service = module.get<EventService>(EventService);
     eventRepository = module.get(EventRepository);
+    categoryService = module.get(CategoryService);
   });
 
   it('should be defined', () => {
@@ -156,6 +163,28 @@ describe('EventService', () => {
 
       expect(result).toEqual(mockEvent);
       expect(eventRepository.createEvent).toHaveBeenCalledWith(createDto);
+      expect(categoryService.findCategoryByIdOrThrow).not.toHaveBeenCalled();
+    });
+
+    it('should throw NotFoundException if category does not exist', async () => {
+      const createDto: CreateEventDto = {
+        title: 'New Event',
+        description: 'Description',
+        startDate: new Date(),
+        endDate: new Date(),
+        location: 'Location',
+        createdById: 'user-id',
+        categoryId: 'missing-category-id',
+      };
+
+      categoryService.findCategoryByIdOrThrow.mockRejectedValue(
+        new NotFoundException('Category not Found'),
+      );
+
+      await expect(service.createEvent(createDto)).rejects.toThrow(
+        NotFoundException,
+      );
+      expect(eventRepository.createEvent).not.toHaveBeenCalled();
     });
   });
 
@@ -178,6 +207,20 @@ describe('EventService', () => {
         mockEvent.id,
         updateDto,
       );
+    });
+
+    it('should throw NotFoundException if new category does not exist', async () => {
+      eventRepository.findEventById.mockResolvedValue(mockEvent);
+      categoryService.findCategoryByIdOrThrow.mockRejectedValue(
+        new NotFoundException('Category not Found'),
+      );
+
+      await expect(
+        service.updateEvent(mockEvent.id, {
+          categoryId: 'missing-category-id',
+        }),
+      ).rejects.toThrow(NotFoundException);
+      expect(eventRepository.updateEvent).not.toHaveBeenCalled();
     });
 
     it('should throw NotFoundException if event not found during update', async () => {

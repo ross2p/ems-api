@@ -56,8 +56,8 @@ export class MeController {
       'Validation failed, no fields given, malformed JSON or access token is invalid or expired',
   })
   @ApiErrorResponse({
-    status: HttpStatus.INTERNAL_SERVER_ERROR,
-    description: 'Email is already taken or unexpected server error',
+    status: HttpStatus.CONFLICT,
+    description: 'Email is already taken',
   })
   @ResponseMessage('User updated successfully')
   public async updateMe(

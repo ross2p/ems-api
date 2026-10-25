@@ -28,6 +28,7 @@ import { ValidationPipe } from '../../pipes/validation.pipe';
 import { createAttendanceSchema } from './schemas/create-attendance.schema';
 import { updateAttendanceSchema } from './schemas/update-attendance.schema';
 import { uuidSchema } from '../../schemas/uuid.schema';
+import { attendanceFilterSchema } from './schemas/attendance-filter.schema';
 
 @ApiTags('Attendance')
 @ApiAuth()
@@ -46,11 +47,15 @@ export class AttendanceController {
     description: 'Attendance records retrieved successfully',
   })
   @ApiErrorResponse({
-    status: HttpStatus.INTERNAL_SERVER_ERROR,
-    description: 'Invalid pagination parameters or unexpected server error',
+    status: HttpStatus.BAD_REQUEST,
+    description:
+      'Invalid query parameters or access token is invalid or expired',
   })
   @ResponseMessage('Attendance records retrieved successfully')
-  async getAllAttendance(@Query() attendanceFilterDto: AttendanceFilterDto) {
+  async getAllAttendance(
+    @Query(new ValidationPipe(attendanceFilterSchema))
+    attendanceFilterDto: AttendanceFilterDto,
+  ) {
     return this.attendanceService.findAllAttendance(attendanceFilterDto);
   }
 
@@ -71,8 +76,8 @@ export class AttendanceController {
       'Validation failed, malformed JSON or access token is invalid or expired',
   })
   @ApiErrorResponse({
-    status: HttpStatus.INTERNAL_SERVER_ERROR,
-    description: 'User or event does not exist or unexpected server error',
+    status: HttpStatus.NOT_FOUND,
+    description: 'User or event not found or access token user not found',
   })
   @ResponseMessage('Attendance record created successfully')
   async createAttendance(
@@ -175,11 +180,8 @@ export class AttendanceController {
   })
   @ApiErrorResponse({
     status: HttpStatus.NOT_FOUND,
-    description: 'Attendance not found or access token user not found',
-  })
-  @ApiErrorResponse({
-    status: HttpStatus.INTERNAL_SERVER_ERROR,
-    description: 'User or event does not exist or unexpected server error',
+    description:
+      'Attendance, user or event not found or access token user not found',
   })
   @ResponseMessage('Attendance record updated successfully')
   async updateAttendance(

@@ -107,6 +107,19 @@ describe('UserService', () => {
   });
 
   describe('updateUser', () => {
+    it('should throw ConflictException if email belongs to another user', async () => {
+      userRepository.findUserById.mockResolvedValue(mockUser);
+      userRepository.findUserByEmail.mockResolvedValue({
+        ...mockUser,
+        id: 'other-user-id',
+      });
+
+      await expect(
+        userService.updateUser(mockUser.id, { email: 'taken@mail.com' }),
+      ).rejects.toThrow(ConflictException);
+      expect(userRepository.updateUser).not.toHaveBeenCalled();
+    });
+
     it('should update a user and hash password if provided', async () => {
       const updateUserDto: UpdateUserDto = {
         email: 'test-new@mail.com',
@@ -119,6 +132,7 @@ describe('UserService', () => {
       };
 
       userRepository.findUserById.mockResolvedValue(mockUser);
+      userRepository.findUserByEmail.mockResolvedValue(null);
       userRepository.updateUser.mockResolvedValue(newUser);
 
       const updatedUser = await userService.updateUser(

@@ -4,7 +4,7 @@ import { CategoryRepository } from './category.repository';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, ConflictException } from '@nestjs/common';
 import { CategoryFilterDto } from './dto/category-filter.dto';
 
 const mockCategory = {
@@ -114,11 +114,22 @@ describe('CategoryService', () => {
   describe('deleteCategory', () => {
     it('should delete a category if found', async () => {
       repository.findCategoryById.mockResolvedValue(mockCategory);
+      repository.countCategoryEvents.mockResolvedValue(0);
       repository.deleteCategory.mockResolvedValue(mockCategory);
 
       const result = await service.deleteCategory(mockCategory.id);
 
       expect(result).toEqual(mockCategory);
+    });
+
+    it('should throw ConflictException if category is used by events', async () => {
+      repository.findCategoryById.mockResolvedValue(mockCategory);
+      repository.countCategoryEvents.mockResolvedValue(2);
+
+      await expect(service.deleteCategory(mockCategory.id)).rejects.toThrow(
+        ConflictException,
+      );
+      expect(repository.deleteCategory).not.toHaveBeenCalled();
     });
 
     it('should throw if category not found', async () => {

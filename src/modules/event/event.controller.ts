@@ -79,8 +79,8 @@ export class EventController {
       'Validation failed, malformed JSON or access token is invalid or expired',
   })
   @ApiErrorResponse({
-    status: HttpStatus.INTERNAL_SERVER_ERROR,
-    description: 'Category does not exist or unexpected server error',
+    status: HttpStatus.NOT_FOUND,
+    description: 'Category not found or access token user not found',
   })
   @ResponseMessage('Event created successfully')
   async createEvent(
@@ -135,11 +135,7 @@ export class EventController {
   })
   @ApiErrorResponse({
     status: HttpStatus.NOT_FOUND,
-    description: 'Event not found or access token user not found',
-  })
-  @ApiErrorResponse({
-    status: HttpStatus.INTERNAL_SERVER_ERROR,
-    description: 'Category does not exist or unexpected server error',
+    description: 'Event or category not found or access token user not found',
   })
   @ResponseMessage('Event updated successfully')
   async updateEvent(

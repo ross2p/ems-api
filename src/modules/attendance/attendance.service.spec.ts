@@ -8,6 +8,8 @@ import { AttendanceFilterDto } from './dtos/attendance-filter.dto';
 import { NotFoundException } from '@nestjs/common';
 import { PageResponse } from '../../utils/pageables/page-response.utils';
 import { AttendanceEntity } from './attendance.entity';
+import { UserService } from '../user/user.service';
+import { EventService } from '../event/event.service';
 
 const mockAttendance = {
   id: 'attendance-id',
@@ -20,6 +22,8 @@ const mockAttendance = {
 describe('AttendanceService', () => {
   let service: AttendanceService;
   let repository: DeepMocked<AttendanceRepository>;
+  let userService: DeepMocked<UserService>;
+  let eventService: DeepMocked<EventService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -29,11 +33,15 @@ describe('AttendanceService', () => {
           provide: AttendanceRepository,
           useValue: createMock<AttendanceRepository>(),
         },
+        { provide: UserService, useValue: createMock<UserService>() },
+        { provide: EventService, useValue: createMock<EventService>() },
       ],
     }).compile();
 
     service = module.get<AttendanceService>(AttendanceService);
     repository = module.get(AttendanceRepository);
+    userService = module.get(UserService);
+    eventService = module.get(EventService);
   });
 
   it('should be defined', () => {
@@ -52,6 +60,35 @@ describe('AttendanceService', () => {
 
       expect(repository.createAttendance).toHaveBeenCalledWith(dto);
       expect(result).toEqual(mockAttendance);
+    });
+  });
+
+  describe('createAttendance relations', () => {
+    const dto: CreateAttendanceDto = {
+      userId: 'missing-user-id',
+      eventId: 'event-id',
+    };
+
+    it('should throw NotFoundException if user does not exist', async () => {
+      userService.findUserByIdOrThrow.mockRejectedValue(
+        new NotFoundException('User not found'),
+      );
+
+      await expect(service.createAttendance(dto)).rejects.toThrow(
+        NotFoundException,
+      );
+      expect(repository.createAttendance).not.toHaveBeenCalled();
+    });
+
+    it('should throw NotFoundException if event does not exist', async () => {
+      eventService.findEventByIdOrThrow.mockRejectedValue(
+        new NotFoundException('Event not found'),
+      );
+
+      await expect(service.createAttendance(dto)).rejects.toThrow(
+        NotFoundException,
+      );
+      expect(repository.createAttendance).not.toHaveBeenCalled();
     });
   });
 

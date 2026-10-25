@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { CategoryRepository } from './category.repository';
 import { checkExists } from '../../utils';
 import { CreateCategoryDto } from './dto/create-category.dto';
@@ -41,6 +41,11 @@ export class CategoryService {
 
   async deleteCategory(categoryId: string) {
     await this.findCategoryByIdOrThrow(categoryId);
+    const eventsCount =
+      await this.categoryRepository.countCategoryEvents(categoryId);
+    if (eventsCount > 0) {
+      throw new ConflictException('Category is used by events');
+    }
     return this.categoryRepository.deleteCategory(categoryId);
   }
 }

@@ -15,6 +15,10 @@ import { EventWithScoreDto } from './dto/event-with-score.dto';
 import { EventRecommendationService } from './event-recommendation.service';
 import { CacheService } from '../../cache/cache.service';
 
+const requiredEventIdSchema = uuidSchema
+  .required()
+  .messages({ 'any.required': 'Event ID is required' });
+
 @ApiTags('Events')
 @ApiAuth()
 @Controller('event')
@@ -42,20 +46,17 @@ export class EventRecommendationController {
   })
   @ApiErrorResponse({
     status: HttpStatus.BAD_REQUEST,
-    description: 'Invalid event ID or access token is invalid or expired',
+    description:
+      'Event ID is missing or invalid or access token is invalid or expired',
   })
   @ApiErrorResponse({
     status: HttpStatus.NOT_FOUND,
     description: 'Event not found or access token user not found',
   })
-  @ApiErrorResponse({
-    status: HttpStatus.INTERNAL_SERVER_ERROR,
-    description: 'eventId is missing or unexpected server error',
-  })
   @ResponseMessage('Similar events retrieved successfully')
   @UseGuards(AuthGuard)
   async getRecommendations(
-    @Query('eventId', new ValidationPipe(uuidSchema))
+    @Query('eventId', new ValidationPipe(requiredEventIdSchema))
     eventId: string,
     @UserDetails() user: UserEntity,
   ) {
