@@ -45,8 +45,12 @@ export class AuthService {
 
     const tokenPair = this.tokenService.generateAccessTokens(user);
 
+    // The user was loaded with its password hash for the check above; never return it
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...userWithoutPassword } = user;
+
     return {
-      user,
+      user: userWithoutPassword,
       accessToken: tokenPair.accessToken,
       refreshToken: tokenPair.refreshToken,
     };

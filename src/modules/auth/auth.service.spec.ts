@@ -95,10 +95,27 @@ describe('AuthService', () => {
 
       const result = await service.login(dto);
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password, ...userWithoutPassword } = mockUser;
       expect(result).toEqual({
-        user: mockUser,
+        user: userWithoutPassword,
         ...mockTokens,
       });
+    });
+
+    it('should not return the password hash', async () => {
+      const dto: LoginDto = {
+        email: 'test@example.com',
+        password: 'password',
+      };
+
+      userService.findUserByEmailWithPassword.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      tokenService.generateAccessTokens.mockReturnValue(mockTokens);
+
+      const result = await service.login(dto);
+
+      expect(result.user).not.toHaveProperty('password');
     });
 
     it('should throw BadRequestException on invalid credentials', async () => {

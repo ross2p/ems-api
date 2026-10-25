@@ -4,5 +4,5 @@ import { UserEntity } from '../../user/user.entity';
 
 export class AuthResponseDto extends TokensDto {
   @ApiProperty({ description: 'Authenticated user', type: UserEntity })
-  user: UserEntity;
+  user: Omit<UserEntity, 'password'>;
 }

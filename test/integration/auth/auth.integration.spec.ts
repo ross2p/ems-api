@@ -72,6 +72,7 @@ describe('AuthService (Integration)', () => {
 
       expect(result.user).toBeDefined();
       expect(result.user.email).toBe(loginDto.email);
+      expect(result.user).not.toHaveProperty('password');
       expect(result.accessToken).toBeDefined();
       expect(result.refreshToken).toBeDefined();
     });
