@@ -2,15 +2,20 @@ import { ApiProperty } from '@nestjs/swagger';
 import { PageResponse } from './page-response.utils';
 export class PageRequest {
   @ApiProperty({
-    description: 'The page number to retrieve',
-    example: 1,
+    description: 'Page number, starting from 1',
+    type: Number,
+    minimum: 1,
+    default: 1,
     required: false,
   })
   pageNumber: number = 1;
 
   @ApiProperty({
-    description: 'The number of items per page',
-    example: 200,
+    description: 'Number of items per page',
+    type: Number,
+    minimum: 1,
+    maximum: 500,
+    default: 200,
     required: false,
   })
   pageSize: number = 200;

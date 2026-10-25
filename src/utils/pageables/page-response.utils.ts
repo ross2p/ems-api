@@ -1,10 +1,20 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { PageRequest } from './page-request.utils';
 
 export class PageResponse<T> {
+  @ApiProperty({ description: 'Total number of items', type: Number })
   public readonly totalCount: number;
+
+  @ApiProperty({ description: 'Current page number', type: Number })
   public readonly pageNumber: number;
+
+  @ApiProperty({ description: 'Number of items on this page', type: Number })
   public readonly pageSize: number;
+
+  @ApiProperty({ description: 'Total number of pages', type: Number })
   public readonly pageCount?: number;
+
+  // Documented per endpoint by ApiPageResponse
   public readonly content: T[];
 
   constructor(pageRequest: PageRequest, content: T[], totalCount: number) {

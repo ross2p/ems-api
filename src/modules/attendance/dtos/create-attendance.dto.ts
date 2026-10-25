@@ -2,14 +2,14 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateAttendanceDto {
   @ApiProperty({
-    description: 'User ID',
-    type: String,
+    description: 'Identifier of the attending user',
+    format: 'uuid',
   })
   userId: string;
 
   @ApiProperty({
-    description: 'Event ID',
-    type: String,
+    description: 'Identifier of the attended event',
+    format: 'uuid',
   })
   eventId: string;
 }

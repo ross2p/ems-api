@@ -3,48 +3,48 @@ import { PageRequest } from '../../../utils/pageables/page-request.utils';
 
 export class EventQueryDto extends PageRequest {
   @ApiProperty({
-    description: 'Search by event title or description',
+    description: 'Search in event title and description',
     required: false,
-    example: 'team meeting',
+    minLength: 1,
+    maxLength: 255,
+    example: 'react',
   })
   search?: string;
 
   @ApiProperty({
-    description: 'Filter by category ID',
+    description: 'Filter by category identifier',
+    format: 'uuid',
     required: false,
-    example: 'a1b2c3d4-e5f6-7890-g1h2-i3j4k5l6m7n8',
   })
   categoryId?: string;
 
   @ApiProperty({
-    description: 'Filter events starting from this date',
+    description: 'Only events starting from this moment',
+    type: String,
+    format: 'date-time',
     required: false,
-    type: Date,
-    example: '2024-01-01T00:00:00Z',
   })
   startDate?: Date;
 
   @ApiProperty({
-    description: 'Filter events ending before this date',
+    description: 'Only events ending before this moment',
+    type: String,
+    format: 'date-time',
     required: false,
-    type: Date,
-    example: '2024-12-31T23:59:59Z',
   })
   endDate?: Date;
 
   @ApiProperty({
-    description: 'Sort field (date refers to startDate)',
+    description: 'Sort field, "date" means startDate',
     required: false,
     enum: ['date', 'title', 'createdAt'],
-    example: 'date',
   })
   sortBy?: 'date' | 'title' | 'createdAt';
 
   @ApiProperty({
-    description: 'Sort order',
+    description: 'Sort direction',
     required: false,
     enum: ['asc', 'desc'],
-    example: 'asc',
   })
   sortOrder?: 'asc' | 'desc';
 }

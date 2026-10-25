@@ -1,19 +1,23 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 
 export class CreateCategoryDto {
   @ApiProperty({
     description: 'Category name',
-    type: String,
-    example: 'Work',
+    minLength: 1,
+    maxLength: 100,
+    example: 'Technology',
   })
   name: string;
 
   @ApiProperty({
     description: 'Category description',
-    type: String,
-    example: 'Work related events',
+    minLength: 1,
+    maxLength: 500,
+    example: 'Tech related events',
   })
   description: string;
 
+  // Set by the server from the authenticated user
+  @ApiHideProperty()
   createdById: string;
 }

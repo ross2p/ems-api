@@ -2,66 +2,84 @@ import { Event } from '../../../generated/prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class EventEntity implements Event {
-  @ApiProperty({
-    description: 'Unique identifier for the event',
-    format: 'uuid',
-  })
+  @ApiProperty({ description: 'Event identifier', format: 'uuid' })
   id: string;
 
   @ApiProperty({
-    description: 'Title of the event',
-    example: 'Tech Conference 2026',
+    description: 'Event title',
+    example: 'Kyiv React & Next.js Meetup',
   })
   title: string;
 
   @ApiProperty({
-    description: 'Detailed description of the event',
-    example: 'Annual developer gathering.',
+    description: 'Event description',
+    example: 'Talks, live demos and networking for React developers.',
   })
   description: string;
 
-  @ApiProperty({ description: 'Start date and time of the event' })
+  @ApiProperty({
+    description: 'When the event starts',
+    type: String,
+    format: 'date-time',
+  })
   startDate: Date;
 
-  @ApiProperty({ description: 'End date and time of the event' })
+  @ApiProperty({
+    description: 'When the event ends',
+    type: String,
+    format: 'date-time',
+  })
   endDate: Date;
 
   @ApiProperty({
-    description: 'Physical or virtual location address',
-    example: '123 Main St, New York',
+    description: 'Event address',
+    example: 'UNIT.City, Dorohozhytska St 3, Kyiv, Ukraine',
   })
   location: string;
 
   @ApiProperty({
-    description: 'Geographical latitude',
-    example: 40.7128,
-    required: false,
+    description: 'Event latitude',
+    type: Number,
     nullable: true,
+    minimum: -90,
+    maximum: 90,
   })
   latitude: number | null;
 
   @ApiProperty({
-    description: 'Geographical longitude',
-    example: -74.006,
-    required: false,
+    description: 'Event longitude',
+    type: Number,
     nullable: true,
+    minimum: -180,
+    maximum: 180,
   })
   longitude: number | null;
 
   @ApiProperty({
-    description: 'Associated category UUID',
+    description: 'Identifier of the event category',
+    type: String,
     format: 'uuid',
-    required: false,
     nullable: true,
   })
   categoryId: string | null;
 
-  @ApiProperty({ description: 'Creator user UUID', format: 'uuid' })
+  @ApiProperty({
+    description: 'Identifier of the user who created the event',
+    format: 'uuid',
+  })
   createdById: string;
 
-  @ApiProperty({ description: 'Record creation timestamp' })
+  @ApiProperty({
+    description: 'When the event was created',
+    type: String,
+    format: 'date-time',
+  })
   createdAt: Date;
 
-  @ApiProperty({ description: 'Record last updated timestamp' })
+  @ApiProperty({
+    description: 'When the event was last updated',
+    type: String,
+    format: 'date-time',
+  })
   updatedAt: Date;
 }

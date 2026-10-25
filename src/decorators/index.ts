@@ -1,3 +1,4 @@
 export * from './is-public.decorator';
 export * from './response-message.decorator';
 export * from './user-details.decorator';
+export * from './api-response.decorator';

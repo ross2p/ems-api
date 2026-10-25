@@ -2,21 +2,37 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Category } from '../../../generated/prisma';
 
 export class CategoryEntity implements Category {
-  @ApiProperty()
+  @ApiProperty({ description: 'Category identifier', format: 'uuid' })
   id: string;
 
-  @ApiProperty()
+  @ApiProperty({ description: 'Category name', example: 'Technology' })
   name: string;
 
-  @ApiProperty({ required: false, nullable: true })
+  @ApiProperty({
+    description: 'Category description',
+    type: String,
+    nullable: true,
+    example: 'Tech related events',
+  })
   description: string | null;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'When the category was created',
+    type: String,
+    format: 'date-time',
+  })
   createdAt: Date;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'When the category was last updated',
+    type: String,
+    format: 'date-time',
+  })
   updatedAt: Date;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Identifier of the user who created the category',
+    format: 'uuid',
+  })
   createdById: string;
 }

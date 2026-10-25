@@ -3,38 +3,52 @@ import {
   Controller,
   Delete,
   Get,
+  HttpStatus,
   Param,
   Patch,
   Post,
   Query,
   UseGuards,
 } from '@nestjs/common';
-import {
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-  ApiParam,
-} from '@nestjs/swagger';
+import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { AttendanceService } from './attendance.service';
 import { CreateAttendanceDto } from './dtos/create-attendance.dto';
 import { UpdateAttendanceDto } from './dtos/update-attendance.dto';
 import { AttendanceFilterDto } from './dtos/attendance-filter.dto';
-import { ResponseMessage } from '../../decorators';
+import { AttendanceEntity } from './attendance.entity';
+import {
+  ApiAuth,
+  ApiErrorResponse,
+  ApiPageResponse,
+  ApiSuccessResponse,
+  ResponseMessage,
+} from '../../decorators';
 import { AuthGuard } from '../../guards/user.guard';
 import { ValidationPipe } from '../../pipes/validation.pipe';
 import { createAttendanceSchema } from './schemas/create-attendance.schema';
 import { updateAttendanceSchema } from './schemas/update-attendance.schema';
 import { uuidSchema } from '../../schemas/uuid.schema';
 
-@ApiBearerAuth()
+@ApiTags('Attendance')
+@ApiAuth()
 @Controller('attendance')
 export class AttendanceController {
   constructor(private readonly attendanceService: AttendanceService) {}
 
   @Get()
   @UseGuards(AuthGuard)
-  @ApiOperation({ summary: 'Get all attendance records with filtering' })
-  @ApiResponse({ status: 200, description: 'List of attendance records' })
+  @ApiOperation({
+    summary: 'Get attendances',
+    description: 'Paginated attendances, optionally for one event.',
+  })
+  @ApiPageResponse({
+    type: AttendanceEntity,
+    description: 'Attendance records retrieved successfully',
+  })
+  @ApiErrorResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Invalid pagination parameters or unexpected server error',
+  })
   @ResponseMessage('Attendance records retrieved successfully')
   async getAllAttendance(@Query() attendanceFilterDto: AttendanceFilterDto) {
     return this.attendanceService.findAllAttendance(attendanceFilterDto);
@@ -42,10 +56,23 @@ export class AttendanceController {
 
   @Post()
   @UseGuards(AuthGuard)
-  @ApiOperation({ summary: 'Create a new attendance record' })
-  @ApiResponse({
-    status: 201,
+  @ApiOperation({
+    summary: 'Create attendance',
+    description: 'Registers a user for an event.',
+  })
+  @ApiSuccessResponse({
+    type: AttendanceEntity,
+    status: HttpStatus.CREATED,
     description: 'Attendance record created successfully',
+  })
+  @ApiErrorResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description:
+      'Validation failed, malformed JSON or access token is invalid or expired',
+  })
+  @ApiErrorResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'User or event does not exist or unexpected server error',
   })
   @ResponseMessage('Attendance record created successfully')
   async createAttendance(
@@ -57,9 +84,24 @@ export class AttendanceController {
 
   @Get(':id')
   @UseGuards(AuthGuard)
-  @ApiOperation({ summary: 'Get attendance record by ID' })
-  @ApiParam({ name: 'id', description: 'Attendance ID' })
-  @ApiResponse({ status: 200, description: 'Attendance record found' })
+  @ApiOperation({ summary: 'Get attendance by ID' })
+  @ApiParam({
+    name: 'id',
+    description: 'Attendance identifier',
+    format: 'uuid',
+  })
+  @ApiSuccessResponse({
+    type: AttendanceEntity,
+    description: 'Attendance record found successfully',
+  })
+  @ApiErrorResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid attendance ID or access token is invalid or expired',
+  })
+  @ApiErrorResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Attendance not found or access token user not found',
+  })
   @ResponseMessage('Attendance record found successfully')
   async getAttendanceById(
     @Param('id', new ValidationPipe(uuidSchema)) attendanceId: string,
@@ -69,9 +111,17 @@ export class AttendanceController {
 
   @Get('user/:userId')
   @UseGuards(AuthGuard)
-  @ApiOperation({ summary: 'Get all attendance records for a user' })
-  @ApiParam({ name: 'userId', description: 'User ID' })
-  @ApiResponse({ status: 200, description: 'User attendance records' })
+  @ApiOperation({ summary: 'Get attendances of a user' })
+  @ApiParam({ name: 'userId', description: 'User identifier', format: 'uuid' })
+  @ApiSuccessResponse({
+    type: AttendanceEntity,
+    isArray: true,
+    description: 'User attendance records retrieved successfully',
+  })
+  @ApiErrorResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid user ID or access token is invalid or expired',
+  })
   @ResponseMessage('User attendance records retrieved successfully')
   async getAttendanceByUserId(
     @Param('userId', new ValidationPipe(uuidSchema)) userId: string,
@@ -81,9 +131,21 @@ export class AttendanceController {
 
   @Get('event/:eventId')
   @UseGuards(AuthGuard)
-  @ApiOperation({ summary: 'Get all attendance records for an event' })
-  @ApiParam({ name: 'eventId', description: 'Event ID' })
-  @ApiResponse({ status: 200, description: 'Event attendance records' })
+  @ApiOperation({ summary: 'Get attendances of an event' })
+  @ApiParam({
+    name: 'eventId',
+    description: 'Event identifier',
+    format: 'uuid',
+  })
+  @ApiSuccessResponse({
+    type: AttendanceEntity,
+    isArray: true,
+    description: 'Event attendance records retrieved successfully',
+  })
+  @ApiErrorResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid event ID or access token is invalid or expired',
+  })
   @ResponseMessage('Event attendance records retrieved successfully')
   async getAttendanceByEventId(
     @Param('eventId', new ValidationPipe(uuidSchema)) eventId: string,
@@ -93,11 +155,31 @@ export class AttendanceController {
 
   @Patch(':id')
   @UseGuards(AuthGuard)
-  @ApiOperation({ summary: 'Update attendance record by ID' })
-  @ApiParam({ name: 'id', description: 'Attendance ID' })
-  @ApiResponse({
-    status: 200,
+  @ApiOperation({
+    summary: 'Update attendance',
+    description: 'Updates only the provided fields, at least one is required.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Attendance identifier',
+    format: 'uuid',
+  })
+  @ApiSuccessResponse({
+    type: AttendanceEntity,
     description: 'Attendance record updated successfully',
+  })
+  @ApiErrorResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description:
+      'Invalid attendance ID, validation failed, no fields given, malformed JSON or access token is invalid or expired',
+  })
+  @ApiErrorResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Attendance not found or access token user not found',
+  })
+  @ApiErrorResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'User or event does not exist or unexpected server error',
   })
   @ResponseMessage('Attendance record updated successfully')
   async updateAttendance(
@@ -113,11 +195,23 @@ export class AttendanceController {
 
   @Delete(':id')
   @UseGuards(AuthGuard)
-  @ApiOperation({ summary: 'Delete attendance record by ID' })
-  @ApiParam({ name: 'id', description: 'Attendance ID' })
-  @ApiResponse({
-    status: 200,
+  @ApiOperation({ summary: 'Delete attendance', description: 'Returns it.' })
+  @ApiParam({
+    name: 'id',
+    description: 'Attendance identifier',
+    format: 'uuid',
+  })
+  @ApiSuccessResponse({
+    type: AttendanceEntity,
     description: 'Attendance record deleted successfully',
+  })
+  @ApiErrorResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid attendance ID or access token is invalid or expired',
+  })
+  @ApiErrorResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Attendance not found or access token user not found',
   })
   @ResponseMessage('Attendance record deleted successfully')
   async deleteAttendance(

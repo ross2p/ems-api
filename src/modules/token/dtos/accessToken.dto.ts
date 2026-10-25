@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class AccessToken {
   @ApiProperty({
-    description: 'The access token',
+    description: 'JWT access token for the Authorization header',
     type: String,
   })
   accessToken: string;

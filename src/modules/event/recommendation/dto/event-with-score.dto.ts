@@ -1,10 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { EventEntity } from '../../event.entity';
+import { EventListItemDto } from '../../dto/event-response.dto';
 
-export class EventWithScoreDto extends EventEntity {
+export class EventWithScoreDto extends EventListItemDto {
   @ApiProperty({
-    description: 'Calculated recommendation relevance score',
-    example: 0.85,
+    description: 'Recommendation relevance score, higher is more relevant',
+    type: Number,
   })
   score: number;
 }

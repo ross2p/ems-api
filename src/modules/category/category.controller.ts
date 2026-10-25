@@ -3,24 +3,27 @@ import {
   Controller,
   Delete,
   Get,
+  HttpStatus,
   Param,
   Patch,
   Post,
   Query,
   UseGuards,
 } from '@nestjs/common';
-import {
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-  ApiTags,
-  ApiParam,
-} from '@nestjs/swagger';
+import { ApiOperation, ApiTags, ApiParam } from '@nestjs/swagger';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { CategoryFilterDto } from './dto/category-filter.dto';
-import { ResponseMessage, UserDetails } from '../../decorators';
+import { CategoryEntity } from './category.entity';
+import {
+  ApiAuth,
+  ApiErrorResponse,
+  ApiPageResponse,
+  ApiSuccessResponse,
+  ResponseMessage,
+  UserDetails,
+} from '../../decorators';
 import { AuthGuard } from '../../guards/user.guard';
 import { UserEntity } from '../user/user.entity';
 import { ValidationPipe } from '../../pipes/validation.pipe';
@@ -29,15 +32,25 @@ import { updateCategorySchema } from './schemas/update-category.schema';
 import { uuidSchema } from '../../schemas/uuid.schema';
 
 @ApiTags('Categories')
-@ApiBearerAuth()
+@ApiAuth()
 @Controller('category')
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
   @Get()
   @UseGuards(AuthGuard)
-  @ApiOperation({ summary: 'Get all categories with pagination and search' })
-  @ApiResponse({ status: 200, description: 'List of categories' })
+  @ApiOperation({
+    summary: 'Get categories',
+    description: 'Paginated categories with search by name.',
+  })
+  @ApiPageResponse({
+    type: CategoryEntity,
+    description: 'Categories retrieved successfully',
+  })
+  @ApiErrorResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Invalid pagination parameters or unexpected server error',
+  })
   @ResponseMessage('Categories retrieved successfully')
   async getCategories(@Query() categoryFilterDto: CategoryFilterDto) {
     return this.categoryService.findPageableCategories(categoryFilterDto);
@@ -45,8 +58,20 @@ export class CategoryController {
 
   @Post()
   @UseGuards(AuthGuard)
-  @ApiOperation({ summary: 'Create a new category' })
-  @ApiResponse({ status: 201, description: 'Category created successfully' })
+  @ApiOperation({
+    summary: 'Create category',
+    description: 'Creates a category owned by the current user.',
+  })
+  @ApiSuccessResponse({
+    type: CategoryEntity,
+    status: HttpStatus.CREATED,
+    description: 'Category created successfully',
+  })
+  @ApiErrorResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description:
+      'Validation failed, malformed JSON or access token is invalid or expired',
+  })
   @ResponseMessage('Category created successfully')
   async createCategory(
     @Body(new ValidationPipe(createCategorySchema))
@@ -60,8 +85,23 @@ export class CategoryController {
   @Get(':id')
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Get category by ID' })
-  @ApiParam({ name: 'id', description: 'Category ID' })
-  @ApiResponse({ status: 200, description: 'Category found' })
+  @ApiParam({
+    name: 'id',
+    description: 'Category identifier',
+    format: 'uuid',
+  })
+  @ApiSuccessResponse({
+    type: CategoryEntity,
+    description: 'Category found successfully',
+  })
+  @ApiErrorResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid category ID or access token is invalid or expired',
+  })
+  @ApiErrorResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Category not found or access token user not found',
+  })
   @ResponseMessage('Category found successfully')
   async getCategoryById(
     @Param('id', new ValidationPipe(uuidSchema)) categoryId: string,
@@ -71,9 +111,28 @@ export class CategoryController {
 
   @Patch(':id')
   @UseGuards(AuthGuard)
-  @ApiOperation({ summary: 'Update category by ID' })
-  @ApiParam({ name: 'id', description: 'Category ID' })
-  @ApiResponse({ status: 200, description: 'Category updated successfully' })
+  @ApiOperation({
+    summary: 'Update category',
+    description: 'Updates only the provided fields.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Category identifier',
+    format: 'uuid',
+  })
+  @ApiSuccessResponse({
+    type: CategoryEntity,
+    description: 'Category updated successfully',
+  })
+  @ApiErrorResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description:
+      'Invalid category ID, validation failed, malformed JSON or access token is invalid or expired',
+  })
+  @ApiErrorResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Category not found or access token user not found',
+  })
   @ResponseMessage('Category updated successfully')
   async updateCategory(
     @Param('id', new ValidationPipe(uuidSchema)) categoryId: string,
@@ -85,9 +144,31 @@ export class CategoryController {
 
   @Delete(':id')
   @UseGuards(AuthGuard)
-  @ApiOperation({ summary: 'Delete category by ID' })
-  @ApiParam({ name: 'id', description: 'Category ID' })
-  @ApiResponse({ status: 200, description: 'Category deleted successfully' })
+  @ApiOperation({
+    summary: 'Delete category',
+    description: 'Deletes a category that no event uses, returns it.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Category identifier',
+    format: 'uuid',
+  })
+  @ApiSuccessResponse({
+    type: CategoryEntity,
+    description: 'Category deleted successfully',
+  })
+  @ApiErrorResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid category ID or access token is invalid or expired',
+  })
+  @ApiErrorResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Category not found or access token user not found',
+  })
+  @ApiErrorResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Category is still used by events or unexpected server error',
+  })
   @ResponseMessage('Category deleted successfully')
   async deleteCategory(
     @Param('id', new ValidationPipe(uuidSchema)) categoryId: string,
